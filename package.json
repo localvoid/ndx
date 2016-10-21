@@ -1,0 +1,52 @@
+{
+  "name": "ndx",
+  "main": "dist/umd/ndx.js",
+  "module": "dist/es6/ndx.js",
+  "typings": "dist/typings/ndx.d.ts",
+  "version": "0.0.1",
+  "description": "Document searching and indexing library.",
+  "license": "MIT",
+  "author": {
+    "name": "Boris Kaul",
+    "email": "localvoid@gmail.com",
+    "url": "https://github.com/localvoid"
+  },
+  "keywords": [
+    "text",
+    "full-text",
+    "index",
+    "search",
+    "relevance"
+  ],
+  "homepage": "https://github.com/localvoid/ndx",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/localvoid/ndx"
+  },
+  "bugs": {
+    "url": "https://github.com/localvoid/ndx/issues"
+  },
+  "github": "https://github.com/localvoid/ndx",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "@types/chai": "^3.4.34",
+    "@types/mocha": "^2.2.32",
+    "@types/node": "^6.0.45",
+    "chai": "^3.4.1",
+    "del": "^2.2.2",
+    "gulp": "github:gulpjs/gulp#4.0",
+    "gulp-mocha": "^3.0.1",
+    "gulp-tslint": "^6.1.2",
+    "gulp-typescript": "^3.0.2",
+    "merge2": "^1.0.2",
+    "mocha": "^2.2.5",
+    "rollup": "^0.36.3",
+    "ts-node": "^1.6.0",
+    "typescript": "^2.0.3"
+  }
+}

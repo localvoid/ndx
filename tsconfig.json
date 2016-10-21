@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "types": [
+      "node",
+      "chai",
+      "mocha"
+    ],
+    "lib": [
+      "es6"
+    ],
+    "outDir": "build/es6",
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "strictNullChecks": true,
+    "removeComments": false,
+    "moduleResolution": "node"
+  },
+  "include": [
+    "src/**/*.ts",
+    "tests/**/*.ts"
+  ],
+  "compileOnSave": false
+}
