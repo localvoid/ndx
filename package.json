@@ -3,8 +3,8 @@
   "main": "dist/umd/ndx.js",
   "module": "dist/es6/ndx.js",
   "typings": "dist/typings/ndx.d.ts",
-  "version": "0.0.1",
-  "description": "Document searching and indexing library.",
+  "version": "0.0.2",
+  "description": "Document text searching and indexing library.",
   "license": "MIT",
   "author": {
     "name": "Boris Kaul",

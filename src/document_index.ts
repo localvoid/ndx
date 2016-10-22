@@ -1,37 +1,78 @@
+import { DocumentDetails } from "./document";
 import { InvertedIndex } from "./inverted_index";
 import { whitespaceTokenizer } from "./tokenizer";
 import { lowerCaseFilter, trimNonWordCharactersFilter } from "./filters";
 
+/**
+ * Search Result.
+ */
 export interface SearchResult<I> {
-  documentId: I;
+  readonly docId: I;
   score: number;
 }
 
-interface FieldDetails<I, D> {
-  name: string;
-  accessor: ((document: D) => string) | string;
-  invertedIndex: InvertedIndex<I>;
+/**
+ * Field Details.
+ */
+interface FieldDetails<D> {
+  /**
+   * Field name.
+   */
+  readonly name: string;
+  /**
+   * Getter is a function that will be used to get value for this field. If getter function isn't specified, field name
+   * will be used to get value.
+   */
+  readonly getter: ((document: D) => string) | string;
+  /**
+   * Sum of field lengths in all documents.
+   */
+  sumLength: number;
+  /**
+   * Average of field lengths in all documents.
+   */
+  avgLength: number;
 }
 
+/**
+ * Field Options.
+ */
 export interface FieldOptions<D> {
-  accessor: (document: D) => string;
+  /**
+   * Getter is a function that will be used to get value for this field. If getter function isn't specified, field name
+   * will be used to get value.
+   */
+  readonly getter?: (document: D) => string;
 }
 
 export function DEFAULT_FILTER(term: string): string {
   return trimNonWordCharactersFilter(lowerCaseFilter(term));
 }
 
+/**
+ * Controls non-linear term frequency normalization (saturation).
+ */
+const BM25_K1 = 1.2;
+
+/**
+ * Controls to what degree document length normalizes tf values.
+ */
+const BM25_B = 0.75;
+
+/**
+ * Document Index
+ */
 export class DocumentIndex<I, D> {
-  private _fieldsByName: Map<string, number>;
-  private _fields: FieldDetails<I, D>[];
-  private _termCount: Map<I, number[]>;
+  private _documents: Map<I, DocumentDetails<I>>;
+  private _index: InvertedIndex<I>;
+  private _fields: FieldDetails<D>[];
   private _tokenizer: (text: string) => string[];
   private _filter: (term: string) => string;
 
   constructor() {
-    this._fieldsByName = new Map();
+    this._documents = new Map();
+    this._index = new InvertedIndex<I>();
     this._fields = [];
-    this._termCount = new Map();
     this._tokenizer = whitespaceTokenizer;
     this._filter = DEFAULT_FILTER;
   }
@@ -40,50 +81,45 @@ export class DocumentIndex<I, D> {
    * Returns number of indexed document.
    */
   get size(): number {
-    return this._termCount.size;
+    return this._documents.size;
   }
 
   /**
    * Create Field Index.
    */
-  createFieldIndex(fieldName: string, options?: FieldOptions<D>): void {
-    let accessor: ((document: D) => string) | string;
+  createIndex(fieldName: string, options?: FieldOptions<D>): void {
+    let getter: ((document: D) => string) | string;
     if (options === undefined) {
-      accessor = fieldName;
+      getter = fieldName;
     } else {
-      accessor = options.accessor || fieldName;
+      getter = options.getter || fieldName;
     }
 
-    const details = {
+    const details: FieldDetails<D> = {
       name: fieldName,
-      accessor: accessor,
-      invertedIndex: new InvertedIndex<I>(),
+      getter: getter,
+      sumLength: 0,
+      avgLength: 0,
     };
 
-    let idx = this._fieldsByName.get(fieldName);
-    if (idx === undefined) {
-      idx = this._fields.push(details) - 1;
-      this._fieldsByName.set(fieldName, idx);
-    } else {
-      this._fields[idx] = details;
-    }
+    this._fields.push(details);
   }
 
   /**
    * Set Text Tokenizer.
    *
-   * Term tokenizer is a simple function that accepts string values and returns array of string.
+   * Tokenizer is a simple function that accepts string values and returns array of string.
    */
   setTokenizer(tokenizer: (text: string) => string[]): void {
     this._tokenizer = tokenizer;
   }
 
   /**
-   * Set Term Filter.
+   * Set Token Filter.
    *
-   * Term filter will be applied to all terms returned by tokenizer.
+   * Token filter will be applied to all tokens returned by tokenizer.
    */
-  setFilter(filter: (term: string) => string): void {
+  setFilter(filter: (token: string) => string): void {
     this._filter = filter;
   }
 
@@ -91,11 +127,12 @@ export class DocumentIndex<I, D> {
    * Add document to the index.
    */
   add(documentId: I, document: D): void {
-    const documentTermCounts = new Array(this._fields.length);
+    const documentTermCounts = new Array<number>(this._fields.length);
+    const termCounts = new Map<string, number[]>();
 
     for (let i = 0; i < this._fields.length; i++) {
       const fieldDetails = this._fields[i];
-      const fieldAccessor = fieldDetails.accessor;
+      const fieldAccessor = fieldDetails.getter;
       const fieldValue = typeof fieldAccessor === "string" ?
         (document as any as { [key: string]: string })[fieldAccessor] :
         fieldAccessor(document);
@@ -107,49 +144,55 @@ export class DocumentIndex<I, D> {
         const terms = this._tokenizer(fieldValue);
 
         // filter and count terms, ignore empty strings
-        const filteredTerms = new Map<string, number>();
+        let filteredTermsCount = 0;
         for (let j = 0; j < terms.length; j++) {
           const term = this._filter(terms[j]);
           if (term !== "") {
-            const n = filteredTerms.get(term);
-            filteredTerms.set(term, n === undefined ? 1 : n + 1);
+            filteredTermsCount++;
+            let counts = termCounts.get(term);
+            if (counts === undefined) {
+              counts = new Array<number>(this._fields.length);
+              for (let k = 0; k < counts.length; k++) {
+                counts[k] = 0;
+              }
+              termCounts.set(term, counts);
+            }
+            counts[i] += 1;
           }
         }
 
-        // add to inverted index
-        filteredTerms.forEach(function (termCount, term) {
-          fieldDetails.invertedIndex.add(term, Math.sqrt(termCount), documentId);
-        });
-
-        documentTermCounts[i] = filteredTerms.size;
+        fieldDetails.sumLength += filteredTermsCount;
+        fieldDetails.avgLength = fieldDetails.sumLength / (this._documents.size + 1);
+        documentTermCounts[i] = filteredTermsCount;
       }
     }
 
-    this._termCount.set(documentId, documentTermCounts);
+    const docDetails: DocumentDetails<I> = {
+      docId: documentId,
+      removed: false,
+      fieldLengths: documentTermCounts,
+    }
+
+    this._documents.set(documentId, docDetails);
+    termCounts.forEach((termCounters, term) => {
+      this._index.add(term, docDetails, termCounters);
+    });
   }
 
   /**
    * Remove document from the index.
    */
-  remove(documentId: I, document: D): void {
-    if (this._termCount.delete(documentId)) {
-      for (let i = 0; i < this._fields.length; i++) {
-        const fieldDetails = this._fields[i];
-        const fieldAccessor = fieldDetails.accessor;
-        const fieldValue = typeof fieldAccessor === "string" ?
-          (document as any as { [key: string]: string })[fieldAccessor] :
-          fieldAccessor(document);
-
-        if (fieldValue !== undefined) {
-          // tokenize text
-          const terms = this._tokenizer(fieldValue);
-          // filter terms, ignore empty strings and remove from inverted index
-          for (let j = 0; j < terms.length; j++) {
-            const term = this._filter(terms[j]);
-            if (term !== "") {
-              fieldDetails.invertedIndex.remove(term, documentId);
-            }
-          }
+  remove(documentId: I): void {
+    const details = this._documents.get(documentId);
+    if (details !== undefined) {
+      details.removed = true;
+      this._documents.delete(documentId);
+      for (let i = 0; this._fields.length; i++) {
+        const fieldLength = details.fieldLengths[i];
+        if (fieldLength > 0) {
+          const field = this._fields[i];
+          field.sumLength -= fieldLength;
+          field.avgLength = field.sumLength / this._documents.size;
         }
       }
     }
@@ -157,92 +200,60 @@ export class DocumentIndex<I, D> {
 
   search(query: string): SearchResult<I>[] {
     const queryTerms = this._tokenizer(query);
-    const filteredQueryTerms = [] as string[];
+
+    const scores = new Map<I, number>();
+
     for (let i = 0; i < queryTerms.length; i++) {
       const term = this._filter(queryTerms[i]);
       if (term !== "") {
-        filteredQueryTerms.push(term);
+        const termNode = this._index.get(term);
+
+        let postings = termNode === null ? null : termNode.postings;
+
+        if (postings !== null) {
+          let documentFrequency = 0;
+          for (let j = 0; j < postings.length; j++) {
+            const pointer = postings[j];
+            if (!pointer.details.removed) {
+              documentFrequency++;
+            }
+          }
+          // calculating BM25 idf
+          const idf = Math.log(1 + (this.size - documentFrequency + 0.5) / (documentFrequency + 0.5));
+
+          for (let j = 0; j < postings.length; j++) {
+            const pointer = postings[j];
+            if (!pointer.details.removed) {
+              let score = 0;
+              for (let k = 0; k < pointer.details.fieldLengths.length; k++) {
+                let tf = pointer.termFrequency[k];
+                if (tf > 0) {
+                  // calculating BM25 tf
+                  const fieldLength = pointer.details.fieldLengths[k];
+                  const avgFieldLength = this._fields[k].avgLength;
+                  tf = ((BM25_K1 + 1) * tf) / (BM25_K1 * ((1 - BM25_B) + BM25_B * (fieldLength / avgFieldLength)) + tf);
+                  score += tf * idf;
+                }
+              }
+              const prevScore = scores.get(pointer.details.docId);
+              scores.set(pointer.details.docId, prevScore === undefined ? score : prevScore + score);
+            }
+          }
+        }
       }
-    }
-
-    let resultScores: Map<I, number> | undefined;
-    for (let i = 0; i < this._fields.length; i++) {
-      const scores = this._searchByField(i, filteredQueryTerms);
-      if (resultScores === undefined) {
-        resultScores = scores;
-      } else {
-        scores.forEach(function (score, documentId) {
-          const prevScore = resultScores!.get(documentId);
-          resultScores!.set(documentId, (score === undefined) ? score : prevScore + score);
-
-        });
-      }
-    }
-
-    if (resultScores === undefined) {
-      return [];
     }
 
     const result = [] as SearchResult<I>[];
-    resultScores.forEach(function (score, documentId) {
+    scores.forEach(function (score, documentId) {
       result.push({
-        documentId: documentId,
+        docId: documentId,
         score: score,
       });
+    });
+    result.sort(function (a, b) {
+      return b.score - a.score;
     });
 
     return result;
   }
-
-  private _searchByField(fieldIdx: number, terms: string[]): Map<I, number> {
-    const scores: Map<I, number> = new Map<I, number>();
-    const fieldDetails = this._fields[fieldIdx];
-    const invertedIndex = fieldDetails.invertedIndex;
-
-    for (let i = 0; i < terms.length; i++) {
-      const term = terms[i];
-      const termNode = invertedIndex.get(term);
-
-      let documents: Map<I, number> | null = null;
-      if (termNode !== null) {
-        documents = termNode.documents;
-      }
-
-      if (documents !== null) {
-        const documentFrequency = documents.size;
-        const inverseDocumentFrequency = Math.log(this.size / (documentFrequency + 1)) + 1;
-
-        if (scores.size !== 0) {
-          const filteredDocuments = new Map<I, number>();
-          scores.forEach((score, documentId) => {
-            const termFrequency = documents!.get(documentId);
-            if (termFrequency !== undefined) {
-              filteredDocuments.set(documentId, termFrequency);
-            }
-          });
-          documents = filteredDocuments;
-        }
-
-        documents.forEach((termFrequency, documentId) => {
-          const fieldTermCount = getTermCount(this._termCount, documentId, fieldIdx);
-          const fieldTermNorm = fieldTermCount === 0 ? 1 : 1 / Math.sqrt(fieldTermCount);
-          const score = termFrequency * inverseDocumentFrequency * fieldTermNorm;
-          const prevScore = scores.get(documentId);
-          scores.set(documentId, (prevScore === undefined) ? score : prevScore + score);
-        });
-      }
-    }
-
-    return scores;
-  }
-}
-
-function getTermCount<I>(counters: Map<I, number[]>, documentId: I, fieldIdx: number): number {
-  const fields = counters.get(documentId);
-
-  if (fields === undefined) {
-    return 0;
-  }
-
-  return fields[fieldIdx];
 }

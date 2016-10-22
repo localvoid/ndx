@@ -1,12 +1,19 @@
+import { DocumentDetails } from "./document";
+
+export interface DocumentPointer<I> {
+  readonly details: DocumentDetails<I>;
+  readonly termFrequency: number[];
+}
+
 /**
  * Trie Node.
  */
 export class InvertedIndexNode<I> {
-  documents: Map<I, number> | null;
+  postings: DocumentPointer<I>[] | null;
   children: Map<number, InvertedIndexNode<I>> | null;
 
   constructor() {
-    this.documents = null;
+    this.postings = null;
     this.children = null;
   }
 }
@@ -50,7 +57,7 @@ export class InvertedIndex<I> {
     return node;
   }
 
-  add(term: string, frequency: number, documentId: I): void {
+  add(term: string, docDetails: DocumentDetails<I>, termFrequency: number[]): void {
     let node = this.root;
 
     for (let i = 0; i < term.length; i++) {
@@ -66,22 +73,18 @@ export class InvertedIndex<I> {
       node = nextNode;
     }
 
-    if (node.documents === null) {
-      node.documents = new Map<I, number>();
+    if (node.postings === null) {
+      node.postings = [];
     }
-    node.documents.set(documentId, frequency);
-  }
-
-  remove(term: string, documentId: I): void {
-    const node = this.get(term);
-    if (node !== null && node.documents !== null) {
-      node.documents.delete(documentId);
-    }
+    node.postings.push({
+      details: docDetails,
+      termFrequency: termFrequency,
+    });
   }
 }
 
 function _expandTerm<I>(node: InvertedIndexNode<I>, results: string[], term: string): void {
-  if (node.documents !== null && node.documents.size > 0) {
+  if (node.postings !== null && node.postings.length > 0) {
     results.push(term);
   }
   if (node.children !== null) {

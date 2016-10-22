@@ -1,4 +1,4 @@
-[ndx](http://github.com/localvoid/ndx) is a javascript (TypeScript) document indexing and searching library.
+[ndx](http://github.com/localvoid/ndx) is a lightweight javascript (TypeScript) text indexing and searching library.
 
 More and more web-applications are starting to work in an offline mode and store data locally, this library solves the
 problem with efficient searching on a local data without any servers.
@@ -13,8 +13,8 @@ Npm package `ndx` provides umd module, es6 module and TypeScript typings.
 import { DocumentIndex } from "ndx";
 
 const index = new DocumentIndex();
-index.createFieldIndex("title");
-index.createFieldIndex("content");
+index.createIndex("title");
+index.createIndex("content");
 
 const documents = [
   {
