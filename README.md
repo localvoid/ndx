@@ -4,11 +4,11 @@ library.
 - Multiple fields full-text indexing and searching.
 - Per-Field score boosting.
 - [BM25](https://en.wikipedia.org/wiki/Okapi_BM25) ranking function to rank matching documents. The same ranking
-function that is used by default in [Lucene](http://lucene.apache.org/core/) >= 6.0.0.
+  function that is used by default in [Lucene](http://lucene.apache.org/core/) >= 6.0.0.
 - [Trie](https://en.wikipedia.org/wiki/Trie) based dynamic Inverted Index that supports updates and removes.
 - Free text queries with query expansion.
 - Small memory footprint. Inverted Index stores just term frequency in documents. Doesn't require storing documents in
-memory.
+  memory.
 - Configurable tokenizer and term filter.
 - ~1.5kb minified and gzipped.
 
@@ -50,10 +50,17 @@ index.search("Lorem");
 
 ```
 
-## Additional packages
+## Useful packages
 
-### Filters
+### Text Procesing
 
-#### stemr
+- [stemr](https://github.com/localvoid/stemr) is an optimized implementation of the Snowball English (porter2) stemmer
+algorithm.
+- [Natural](https://github.com/NaturalNode/natural/) is a general natural language facility for nodejs. Tokenizing,
+stemming, classification, phonetics, tf-idf, WordNet, string similarity, and some inflections are currently supported.
 
-[stemr](https://github.com/localvoid/stemr) is an implementation of the Snowball English (porter2) stemmer algorithm.
+### Other Javascript Search Engines
+
+- [lunr](https://github.com/olivernn/lunr.js)
+- [search-index](https://github.com/fergiemcdowall/search-index)
+- [elasticlunr](https://github.com/weixsong/elasticlunr.js)
