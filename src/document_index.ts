@@ -4,6 +4,46 @@ import { whitespaceTokenizer } from "./tokenizer";
 import { lowerCaseFilter, trimNonWordCharactersFilter } from "./filters";
 
 /**
+ * BM25 Ranking function constants.
+ */
+export interface BM25Options {
+  /**
+   * Controls non-linear term frequency normalization (saturation).
+   *
+   * Default value: 1.2
+   */
+  readonly k1?: number;
+
+  /**
+   * Controls to what degree document length normalizes tf values.
+   *
+   * Default value: 0.75
+   */
+  readonly b?: number;
+}
+
+/**
+ * Document Index options.
+ */
+export interface DocumentIndexOptions {
+  /**
+   * BM25 Ranking function constants.
+   */
+  readonly bm25?: BM25Options;
+}
+
+/**
+ * Field Options.
+ */
+export interface FieldOptions<D> {
+  /**
+   * Getter is a function that will be used to get value for this field. If getter function isn't specified, field name
+   * will be used to get value.
+   */
+  readonly getter?: (document: D) => string;
+}
+
+/**
  * Search Result.
  */
 export interface SearchResult<I> {
@@ -34,33 +74,12 @@ interface FieldDetails<D> {
   avgLength: number;
 }
 
-/**
- * Field Options.
- */
-export interface FieldOptions<D> {
-  /**
-   * Getter is a function that will be used to get value for this field. If getter function isn't specified, field name
-   * will be used to get value.
-   */
-  readonly getter?: (document: D) => string;
-}
-
 export function DEFAULT_FILTER(term: string): string {
   return trimNonWordCharactersFilter(lowerCaseFilter(term));
 }
 
 /**
- * Controls non-linear term frequency normalization (saturation).
- */
-const BM25_K1 = 1.2;
-
-/**
- * Controls to what degree document length normalizes tf values.
- */
-const BM25_B = 0.75;
-
-/**
- * Document Index
+ * Document Index.
  */
 export class DocumentIndex<I, D> {
   private _documents: Map<I, DocumentDetails<I>>;
@@ -68,13 +87,29 @@ export class DocumentIndex<I, D> {
   private _fields: FieldDetails<D>[];
   private _tokenizer: (text: string) => string[];
   private _filter: (term: string) => string;
+  private _bm25k1: number;
+  private _bm25b: number;
 
-  constructor() {
+  constructor(options?: DocumentIndexOptions) {
     this._documents = new Map();
     this._index = new InvertedIndex<I>();
     this._fields = [];
     this._tokenizer = whitespaceTokenizer;
     this._filter = DEFAULT_FILTER;
+    this._bm25k1 = 1.2;
+    this._bm25b = 0.75;
+
+    if (options !== undefined) {
+      const bm25 = options.bm25;
+      if (bm25 !== undefined) {
+        if (bm25.k1 !== undefined) {
+          this._bm25k1 = bm25.k1;
+        }
+        if (bm25.b !== undefined) {
+          this._bm25b = bm25.b;
+        }
+      }
+    }
   }
 
   /**
@@ -87,7 +122,7 @@ export class DocumentIndex<I, D> {
   /**
    * Create Field Index.
    */
-  createIndex(fieldName: string, options?: FieldOptions<D>): void {
+  addField(fieldName: string, options?: FieldOptions<D>): void {
     let getter: ((document: D) => string) | string;
     if (options === undefined) {
       getter = fieldName;
@@ -228,7 +263,9 @@ export class DocumentIndex<I, D> {
                   // calculating BM25 tf
                   const fieldLength = pointer.details.fieldLengths[k];
                   const avgFieldLength = this._fields[k].avgLength;
-                  tf = ((BM25_K1 + 1) * tf) / (BM25_K1 * ((1 - BM25_B) + BM25_B * (fieldLength / avgFieldLength)) + tf);
+                  const k1 = this._bm25k1;
+                  const b = this._bm25b;
+                  tf = ((k1 + 1) * tf) / (k1 * ((1 - b) + b * (fieldLength / avgFieldLength)) + tf);
                   score += tf * idf;
                 }
               }
