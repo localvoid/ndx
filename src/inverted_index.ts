@@ -9,10 +9,12 @@ export interface DocumentPointer<I> {
  * Trie Node.
  */
 export class InvertedIndexNode<I> {
+  readonly charCode: number;
   postings: DocumentPointer<I>[] | null;
-  children: Map<number, InvertedIndexNode<I>> | null;
+  children: InvertedIndexNode<I>[] | null;
 
-  constructor() {
+  constructor(charCode: number) {
+    this.charCode = charCode;
     this.postings = null;
     this.children = null;
   }
@@ -20,15 +22,26 @@ export class InvertedIndexNode<I> {
 
 function createNodes<I>(parent: InvertedIndexNode<I>, term: string, start: number): InvertedIndexNode<I> {
   for (; start < term.length; start++) {
-    const c = term.charCodeAt(start);
-    const newNode = new InvertedIndexNode<I>();
+    const newNode = new InvertedIndexNode<I>(term.charCodeAt(start));
     if (parent.children === null) {
-      parent.children = new Map<number, InvertedIndexNode<I>>();
+      parent.children = [];
     }
-    parent.children.set(c, newNode);
+    parent.children.push(newNode);
     parent = newNode;
   }
   return parent;
+}
+
+function findChild<I>(node: InvertedIndexNode<I>, charCode: number): InvertedIndexNode<I> | undefined {
+  if (node.children !== null) {
+    for (let i = 0; i < node.children.length; i++) {
+      const child = node.children[i];
+      if (child.charCode === charCode) {
+        return child;
+      }
+    }
+  }
+  return undefined;
 }
 
 /**
@@ -38,17 +51,14 @@ export class InvertedIndex<I> {
   root: InvertedIndexNode<I>;
 
   constructor() {
-    this.root = new InvertedIndexNode<I>();
+    this.root = new InvertedIndexNode<I>(0);
   }
 
   get(term: string): InvertedIndexNode<I> | null {
     let node: InvertedIndexNode<I> | undefined = this.root;
 
     for (let i = 0; i < term.length; i++) {
-      if (node.children === null) {
-        return null;
-      }
-      node = node.children.get(term.charCodeAt(i));
+      node = findChild(node, term.charCodeAt(i));
       if (node === undefined) {
         return null;
       }
@@ -65,7 +75,7 @@ export class InvertedIndex<I> {
         node = createNodes(node, term, i);
         break;
       }
-      const nextNode = node.children.get(term.charCodeAt(i));
+      const nextNode = findChild(node, term.charCodeAt(i));
       if (nextNode === undefined) {
         node = createNodes(node, term, i);
         break;
@@ -88,9 +98,10 @@ function _expandTerm<I>(node: InvertedIndexNode<I>, results: string[], term: str
     results.push(term);
   }
   if (node.children !== null) {
-    node.children.forEach((node, key) => {
-      _expandTerm(node, results, term + String.fromCharCode(key));
-    });
+    for (let i = 0; i < node.children.length; i++) {
+      const child = node.children[i];
+      _expandTerm(child, results, term + String.fromCharCode(child.charCode));
+    }
   }
 }
 

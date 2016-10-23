@@ -22,8 +22,8 @@ Npm package `ndx` provides umd module, es6 module and TypeScript typings.
 import { DocumentIndex } from "ndx";
 
 const index = new DocumentIndex();
-index.createIndex("title");
-index.createIndex("content");
+index.addField("title");
+index.addField("content");
 
 const documents = [
   {
@@ -59,7 +59,7 @@ algorithm.
 - [Natural](https://github.com/NaturalNode/natural/) is a general natural language facility for nodejs. Tokenizing,
 stemming, classification, phonetics, tf-idf, WordNet, string similarity, and some inflections are currently supported.
 
-### Other Javascript Search Engines
+### Alternative Javascript Full-Text Search Engines
 
 - [lunr](https://github.com/olivernn/lunr.js)
 - [search-index](https://github.com/fergiemcdowall/search-index)
