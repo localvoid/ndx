@@ -41,6 +41,10 @@ export interface FieldOptions<D> {
    * will be used to get value.
    */
   readonly getter?: (document: D) => string;
+  /**
+   * Score boosting factor.
+   */
+  readonly boost: number;
 }
 
 /**
@@ -64,6 +68,10 @@ interface FieldDetails<D> {
    * will be used to get value.
    */
   readonly getter: ((document: D) => string) | string;
+  /**
+   * Score boosting factor.
+   */
+  boost: number;
   /**
    * Sum of field lengths in all documents.
    */
@@ -123,16 +131,23 @@ export class DocumentIndex<I, D> {
    * Create Field Index.
    */
   addField(fieldName: string, options?: FieldOptions<D>): void {
-    let getter: ((document: D) => string) | string;
-    if (options === undefined) {
+    let getter: ((document: D) => string) | string | undefined;
+    let boost: number | undefined;
+    if (options !== undefined) {
+      getter = options.getter;
+      boost = options.boost;
+    }
+    if (getter === undefined) {
       getter = fieldName;
-    } else {
-      getter = options.getter || fieldName;
+    }
+    if (boost === undefined) {
+      boost = 1;
     }
 
     const details: FieldDetails<D> = {
       name: fieldName,
       getter: getter,
+      boost: boost,
       sumLength: 0,
       avgLength: 0,
     };
@@ -262,11 +277,12 @@ export class DocumentIndex<I, D> {
                 if (tf > 0) {
                   // calculating BM25 tf
                   const fieldLength = pointer.details.fieldLengths[k];
-                  const avgFieldLength = this._fields[k].avgLength;
+                  const fieldDetails = this._fields[k]
+                  const avgFieldLength = fieldDetails.avgLength;
                   const k1 = this._bm25k1;
                   const b = this._bm25b;
                   tf = ((k1 + 1) * tf) / (k1 * ((1 - b) + b * (fieldLength / avgFieldLength)) + tf);
-                  score += tf * idf;
+                  score += tf * idf * fieldDetails.boost;
                 }
               }
               const prevScore = scores.get(pointer.details.docId);
