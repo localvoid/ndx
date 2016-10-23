@@ -285,8 +285,10 @@ export class DocumentIndex<I, D> {
                   score += tf * idf * fieldDetails.boost;
                 }
               }
-              const prevScore = scores.get(pointer.details.docId);
-              scores.set(pointer.details.docId, prevScore === undefined ? score : prevScore + score);
+              if (score > 0) {
+                const prevScore = scores.get(pointer.details.docId);
+                scores.set(pointer.details.docId, prevScore === undefined ? score : prevScore + score);
+              }
             }
           }
         }
