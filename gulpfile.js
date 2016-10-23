@@ -3,6 +3,9 @@ const series = gulp.series;
 const parallel = gulp.parallel;
 const mocha = require("gulp-mocha");
 const tsConfig = require("./tsconfig.json")
+const ts = require("gulp-typescript");
+const rollup = require("rollup");
+const typescript = require("typescript");
 
 function clean() {
   return require("del")(["dist", "build"]);
@@ -15,13 +18,22 @@ function test() {
     .pipe(mocha({ reporter: "progress" }));
 }
 
+function buildES5() {
+  return gulp.src(["src/**/*.ts"])
+    .pipe(ts(Object.assign({}, tsConfig.compilerOptions, {
+      typescript: typescript,
+      target: "es5",
+      module: "es6",
+    })))
+    .pipe(gulp.dest("build/es5"));
+};
+
 function buildES6() {
-  const ts = require("gulp-typescript");
   const merge = require("merge2");
 
   const result = gulp.src(["src/**/*.ts"])
     .pipe(ts(Object.assign({}, tsConfig.compilerOptions, {
-      typescript: require("typescript"),
+      typescript: typescript,
       target: "es6",
       declaration: true,
     })));
@@ -32,24 +44,27 @@ function buildES6() {
   ]);
 }
 
-function dist() {
-  const rollup = require("rollup");
+function distES5() {
+  return rollup.rollup({
+    entry: "build/es5/ndx.js",
+  }).then((bundle) => bundle.write({
+    format: "umd",
+    moduleName: "ndx",
+    dest: "dist/umd/ndx.js",
+  }));
+}
 
+function distES6() {
   return rollup.rollup({
     entry: "build/es6/ndx.js",
-  }).then((bundle) => Promise.all([
-    bundle.write({
-      format: "es",
-      dest: "dist/es6/ndx.js",
-    }),
-    bundle.write({
-      format: "umd",
-      moduleName: "ndx",
-      dest: "dist/umd/ndx.js",
-    }),
-  ]));
+  }).then((bundle) => bundle.write({
+    format: "es",
+    dest: "dist/es6/ndx.js",
+  }));
 }
+
+const dist = series(parallel(buildES5, buildES6), parallel(distES5, distES6));
 
 exports.clean = clean;
 exports.test = test;
-exports.dist = exports.default = series(clean, buildES6, dist);
+exports.dist = exports.default = series(clean, dist);

@@ -151,10 +151,7 @@ export class DocumentIndex<I, D> {
             filteredTermsCount++;
             let counts = termCounts.get(term);
             if (counts === undefined) {
-              counts = new Array<number>(this._fields.length);
-              for (let k = 0; k < counts.length; k++) {
-                counts[k] = 0;
-              }
+              counts = new Array<number>(this._fields.length).fill(0);
               termCounts.set(term, counts);
             }
             counts[i] += 1;
