@@ -55,9 +55,11 @@ index.search("Lorem");
 ### Text Procesing
 
 - [stemr](https://github.com/localvoid/stemr) is an optimized implementation of the Snowball English (porter2) stemmer
-algorithm.
+  algorithm.
 - [Natural](https://github.com/NaturalNode/natural/) is a general natural language facility for nodejs. Tokenizing,
-stemming, classification, phonetics, tf-idf, WordNet, string similarity, and some inflections are currently supported.
+  stemming, classification, phonetics, tf-idf, WordNet, string similarity, and some inflections are currently supported.
+- [stopword](https://github.com/fergiemcdowall/stopword) is a node module that allows you to strip stopwords from an
+  input text.
 
 ### Alternative Javascript Full-Text Search Engines
 
