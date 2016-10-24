@@ -48,18 +48,17 @@ index.search("First");
 
 index.search("Lorem");
 // => [{ docId: "doc2", score: ... }, { docId: "doc1", score: ... }]
-
 ```
 
 ## Documentation
 
 - [Creating a new Document Index](#create_index)
 - [Adding a text field to an index](#add_field)
+- [Changing a tokenizer](#set_tokenizer)
+- [Changing a term filter](#set_filter)
 - [Adding a document to an index](#add_doc)
 - [Removing a document from an index](#remove_doc)
 - [Search with a free text query](#search)
-- [Changing a tokenizer](#set_tokenizer)
-- [Changing a term filter](#set_filter)
 - [Vacuuming](#vacuum)
 
 ### <a name="create_index"></a>Creating a new Document Index

@@ -63,7 +63,19 @@ function distES6() {
   }));
 }
 
-const dist = series(parallel(buildES5, buildES6), parallel(distES5, distES6));
+function minifyUMD() {
+  const uglify = require("gulp-uglify");
+  const rename = require("gulp-rename");
+
+  return gulp.src(["dist/umd/ndx.js"])
+    .pipe(uglify())
+    .pipe(rename({
+      suffix: ".min",
+    }))
+    .pipe(gulp.dest("dist/umd"));
+}
+
+const dist = series(parallel(buildES5, buildES6), parallel(distES5, distES6), minifyUMD);
 
 exports.clean = clean;
 exports.test = test;
