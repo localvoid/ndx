@@ -20,6 +20,9 @@ export class InvertedIndexNode<I> {
   }
 }
 
+/**
+ * Create trie nodes for the `term` starting from the `start` character.
+ */
 function createNodes<I>(parent: InvertedIndexNode<I>, term: string, start: number): InvertedIndexNode<I> {
   for (; start < term.length; start++) {
     const newNode = new InvertedIndexNode<I>(term.charCodeAt(start));
@@ -32,6 +35,9 @@ function createNodes<I>(parent: InvertedIndexNode<I>, term: string, start: numbe
   return parent;
 }
 
+/**
+ * Find trie child node that matches `charCode`.
+ */
 function findChild<I>(node: InvertedIndexNode<I>, charCode: number): InvertedIndexNode<I> | undefined {
   if (node.children !== null) {
     for (let i = 0; i < node.children.length; i++) {
@@ -54,6 +60,9 @@ export class InvertedIndex<I> {
     this.root = new InvertedIndexNode<I>(0);
   }
 
+  /**
+   * Get trie node that matches the `term`.
+   */
   get(term: string): InvertedIndexNode<I> | null {
     let node: InvertedIndexNode<I> | undefined = this.root;
 

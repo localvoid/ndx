@@ -1,5 +1,5 @@
 import { DocumentDetails } from "./document";
-import { InvertedIndex } from "./inverted_index";
+import { InvertedIndex, invertedIndexExpandTerm } from "./inverted_index";
 import { whitespaceTokenizer } from "./tokenizer";
 import { lowerCaseFilter, trimNonWordCharactersFilter } from "./filters";
 
@@ -245,6 +245,11 @@ export class DocumentIndex<I, D> {
     }
   }
 
+  /**
+   * Search with a free text query.
+   *
+   * All token separators work as a disjunction operator.
+   */
   search(query: string): SearchResult<I>[] {
     const queryTerms = this._tokenizer(query);
 
@@ -253,41 +258,47 @@ export class DocumentIndex<I, D> {
     for (let i = 0; i < queryTerms.length; i++) {
       const term = this._filter(queryTerms[i]);
       if (term !== "") {
-        const termNode = this._index.get(term);
+        const expandedTerms = invertedIndexExpandTerm(this._index, term);
+        for (let j = 0; j < expandedTerms.length; j++) {
+          const eTerm = expandedTerms[j];
+          const expansionBoost = eTerm === term ? 1 : Math.log(1 + (1 / (eTerm.length - term.length)));
+          const termNode = this._index.get(eTerm);
 
-        let postings = termNode === null ? null : termNode.postings;
+          let postings = termNode === null ? null : termNode.postings;
 
-        if (postings !== null) {
-          let documentFrequency = 0;
-          for (let j = 0; j < postings.length; j++) {
-            const pointer = postings[j];
-            if (!pointer.details.removed) {
-              documentFrequency++;
-            }
-          }
-          // calculating BM25 idf
-          const idf = Math.log(1 + (this.size - documentFrequency + 0.5) / (documentFrequency + 0.5));
-
-          for (let j = 0; j < postings.length; j++) {
-            const pointer = postings[j];
-            if (!pointer.details.removed) {
-              let score = 0;
-              for (let k = 0; k < pointer.details.fieldLengths.length; k++) {
-                let tf = pointer.termFrequency[k];
-                if (tf > 0) {
-                  // calculating BM25 tf
-                  const fieldLength = pointer.details.fieldLengths[k];
-                  const fieldDetails = this._fields[k]
-                  const avgFieldLength = fieldDetails.avgLength;
-                  const k1 = this._bm25k1;
-                  const b = this._bm25b;
-                  tf = ((k1 + 1) * tf) / (k1 * ((1 - b) + b * (fieldLength / avgFieldLength)) + tf);
-                  score += tf * idf * fieldDetails.boost;
-                }
+          if (postings !== null) {
+            let documentFrequency = 0;
+            for (let j = 0; j < postings.length; j++) {
+              const pointer = postings[j];
+              if (!pointer.details.removed) {
+                documentFrequency++;
               }
-              if (score > 0) {
-                const prevScore = scores.get(pointer.details.docId);
-                scores.set(pointer.details.docId, prevScore === undefined ? score : prevScore + score);
+            }
+
+            // calculating BM25 idf
+            const idf = Math.log(1 + (this.size - documentFrequency + 0.5) / (documentFrequency + 0.5));
+
+            for (let k = 0; k < postings.length; k++) {
+              const pointer = postings[k];
+              if (!pointer.details.removed) {
+                let score = 0;
+                for (let x = 0; x < pointer.details.fieldLengths.length; x++) {
+                  let tf = pointer.termFrequency[x];
+                  if (tf > 0) {
+                    // calculating BM25 tf
+                    const fieldLength = pointer.details.fieldLengths[x];
+                    const fieldDetails = this._fields[x]
+                    const avgFieldLength = fieldDetails.avgLength;
+                    const k1 = this._bm25k1;
+                    const b = this._bm25b;
+                    tf = ((k1 + 1) * tf) / (k1 * ((1 - b) + b * (fieldLength / avgFieldLength)) + tf);
+                    score += tf * idf * fieldDetails.boost * expansionBoost;
+                  }
+                }
+                if (score > 0) {
+                  const prevScore = scores.get(pointer.details.docId);
+                  scores.set(pointer.details.docId, prevScore === undefined ? score : prevScore + score);
+                }
               }
             }
           }
@@ -307,5 +318,12 @@ export class DocumentIndex<I, D> {
     });
 
     return result;
+  }
+
+  /**
+   * Expand term with all possible combinations.
+   */
+  expandTerm(term: string): string[] {
+    return invertedIndexExpandTerm(this._index, term);
   }
 }
