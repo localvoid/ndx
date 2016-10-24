@@ -268,9 +268,8 @@ export class DocumentIndex<I, D> {
 
           if (postings !== null) {
             let documentFrequency = 0;
-            for (let j = 0; j < postings.length; j++) {
-              const pointer = postings[j];
-              if (!pointer.details.removed) {
+            for (let k = 0; k < postings.length; k++) {
+              if (!postings[k].details.removed) {
                 documentFrequency++;
               }
             }
