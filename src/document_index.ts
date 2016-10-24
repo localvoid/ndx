@@ -234,7 +234,7 @@ export class DocumentIndex<I, D> {
     if (details !== undefined) {
       details.removed = true;
       this._documents.delete(documentId);
-      for (let i = 0; this._fields.length; i++) {
+      for (let i = 0; i < this._fields.length; i++) {
         const fieldLength = details.fieldLengths[i];
         if (fieldLength > 0) {
           const field = this._fields[i];
