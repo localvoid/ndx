@@ -1,5 +1,5 @@
 import { DocumentDetails } from "./document";
-import { InvertedIndex, invertedIndexExpandTerm } from "./inverted_index";
+import { InvertedIndex } from "./inverted_index";
 import { whitespaceTokenizer } from "./tokenizer";
 import { lowerCaseFilter, trimNonWordCharactersFilter } from "./filters";
 
@@ -258,7 +258,7 @@ export class DocumentIndex<I, D> {
     for (let i = 0; i < queryTerms.length; i++) {
       const term = this._filter(queryTerms[i]);
       if (term !== "") {
-        const expandedTerms = invertedIndexExpandTerm(this._index, term);
+        const expandedTerms = this._index.expandTerm(term);
         for (let j = 0; j < expandedTerms.length; j++) {
           const eTerm = expandedTerms[j];
           const expansionBoost = eTerm === term ? 1 : Math.log(1 + (1 / (eTerm.length - term.length)));
@@ -324,6 +324,6 @@ export class DocumentIndex<I, D> {
    * Expand term with all possible combinations.
    */
   expandTerm(term: string): string[] {
-    return invertedIndexExpandTerm(this._index, term);
+    return this._index.expandTerm(term);
   }
 }

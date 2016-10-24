@@ -100,6 +100,19 @@ export class InvertedIndex<I> {
       termFrequency: termFrequency,
     });
   }
+
+  /**
+   * Expand term with all indexed terms.
+   */
+  expandTerm(term: string): string[] {
+    const node = this.get(term);
+    const results = [] as string[];
+    if (node !== null) {
+      _expandTerm(node, results, term);
+    }
+
+    return results;
+  }
 }
 
 function _expandTerm<I>(node: InvertedIndexNode<I>, results: string[], term: string): void {
@@ -112,17 +125,4 @@ function _expandTerm<I>(node: InvertedIndexNode<I>, results: string[], term: str
       _expandTerm(child, results, term + String.fromCharCode(child.charCode));
     }
   }
-}
-
-/**
- * Expand term with all indexed terms.
- */
-export function invertedIndexExpandTerm<I>(index: InvertedIndex<I>, term: string): string[] {
-  const node = index.get(term);
-  const results = [] as string[];
-  if (node !== null) {
-    _expandTerm(node, results, term);
-  }
-
-  return results;
 }

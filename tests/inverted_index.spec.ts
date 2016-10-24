@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { InvertedIndex, InvertedIndexNode, invertedIndexExpandTerm } from "../src/inverted_index";
+import { InvertedIndex, InvertedIndexNode } from "../src/inverted_index";
 
 describe("InvertedIndex", () => {
   describe("empty", () => {
@@ -94,7 +94,7 @@ describe("InvertedIndex", () => {
       idx.add("term1", { docId: "doc1", removed: false, fieldLengths: [1] }, [1]);
       idx.add("term11", { docId: "doc2", removed: false, fieldLengths: [2] }, [2]);
       idx.add("abc", { docId: "doc3", removed: false, fieldLengths: [1] }, [1]);
-      const terms = invertedIndexExpandTerm(idx, "te");
+      const terms = idx.expandTerm("te");
       expect(terms).to.be.eql(["term1", "term11"]);
     });
   });
