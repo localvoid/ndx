@@ -53,9 +53,20 @@ index.search("Lorem");
 
 ## Documentation
 
-### Creating a new Document Index
+- [Creating a new Document Index](#create_index)
+- [Adding a text field to an index](#add_field)
+- [Adding a document to an index](#add_doc)
+- [Removing a document from an index](#remove_doc)
+- [Search with a free text query](#search)
+- [Changing a tokenizer](#set_tokenizer)
+- [Changing a term filter](#set_filter)
+- [Vacuuming](#vacuum)
+
+### <a name="create_index"></a>Creating a new Document Index
 
 `DocumentIndex<I, D>(options?: DocumentIndexOptions)`
+
+Document Index is a main object that stores all internal statistics and Inverted Index for documents.
 
 #### Parametric Types
 
@@ -111,9 +122,15 @@ const index = new DocumentIndex({
 });
 ```
 
-### Adding a text field to an index
+### <a name="add_field"></a>Adding a text field to an index
 
 `addField(fieldName: string, options?: FieldOptions) => void`
+
+The first step after creating a document index should be registering all text fields. Document Index is indexing only
+registered text fields in documents.
+
+Each field can have its own score boosting factor, score boosting factor will be used to boost score when ranking
+documents.
 
 #### Options
 
@@ -153,7 +170,56 @@ index.addField("description");
 index.addField("body", { getter: (doc) => doc.body });
 ```
 
-### Adding a document to an index
+### <a name="set_tokenizer"></a>Changing a tokenizer
+
+Tokenizer is a function that breaks a text into words, phrases, symbols, or other meaningful elements called tokens.
+
+Default ndx tokenizer breaks words on spaces, tabs, line feeds and assumes that contiguous nonwhitespace characters
+form a single token.
+
+`setTokenizer(tokenizer: (text: string) => token) => void`
+
+#### Example
+
+```js
+const index = new DocumentIndex();
+
+/**
+ * Set a tokenizer that will break on whitespaces and "-" symbols.
+ */
+index.setTokenizer((text) => text.trim().split(/[\s-]+/));
+```
+
+### <a name="set_filter"></a>Changing a term filter
+
+Filter is a function that processes tokens and returns terms, terms are used in Inverted Index to index documents.
+
+Default ndx filter transforms all characters to lower case and removes all non-word characters at the beginning and
+the end of a term.
+
+#### Example
+
+```js
+/**
+ * Import a snowball(english) stemmer from `stemr` package.
+ */
+import { stem } from "stemr";
+
+const index = new DocumentIndex();
+
+/**
+ * Set a filter that will process tokens by lower casing all characters, removing all non-word characters at the
+ * beginning and the end of a term and stemming with a snowball stemmer.
+ */
+index.setFilter((term) => stem(term.toLowerCase().replace(/^\W+/, "").replace(/\W+$/, "")));
+```
+
+### <a name="add_doc"></a>Adding a document to an index
+
+When all fields are registered, tokenizer and filter is set, Document Index is ready to index documents.
+
+Document Index doesn't store documents internally to reduce memory footprint, all results will contain a `docId` that is
+associated with an added document.
 
 `add(docId: I, document: D) => void`
 
@@ -178,7 +244,11 @@ const doc = {
 index.add(doc.id, doc);
 ```
 
-### Removing document from an index
+### <a name="remove_doc"></a>Removing a document from an index
+
+Remove method requires to know just document id to remove it from an index. When document is removed from an index, it
+is actually marked as removed, and when searching all removed documents will be ignored. `vacuum()` method is used to
+completely remove all data from an index.
 
 `remove(docId: I) => void`
 
@@ -208,7 +278,11 @@ index.add(doc.id, doc);
 index.remove(doc.id);
 ```
 
-### Search a document with a free text query
+### <a name="search"></a>Search with a free text query
+
+Perform a search query with a free text, query will be preprocessed in the same way as all text fields with a registered
+tokenizer and filter. Each token separator will work as a disjunction operator. All terms will be expanded to find more
+documents, documents with expanded terms will have a lower score than documents with exact terms.
 
 `search(query: string) => SearchResult[]`
 
@@ -257,41 +331,9 @@ index.search("dolor");
 // => [{ docId: "1" }]
 ```
 
-### Changing a default tokenizer
-
-`setTokenizer(tokenizer: (text: string) => token) => void`
-
-#### Example
-
-```js
-const index = new DocumentIndex();
-
-/**
- * Set a tokenizer that will break on whitespaces and "-" symbols.
- */
-index.setTokenizer((text) => text.trim().split(/[\s-]+/));
-```
-
-### Changing a default term filter
-
-#### Example
-
-```js
-/**
- * Import a snowball(english) stemmer from `stemr` package.
- */
-import { stem } from "stemr";
-
-const index = new DocumentIndex();
-
-/**
- * Set a filter that will preprocess terms by lower casing all characters, removing all non-word characters at the edges
- * and stem with a snowball stemmer.
- */
-index.setFilter((term) => stem(term.toLowerCase().replace(/^\W+/, "").replace(/\W+$/, "")));
-```
-
 ### Extending a term
+
+Extend a term with all possible combinations starting from a `term` that is registered in an index.
 
 `extendTerm(term: string) => string[]`
 
@@ -327,7 +369,9 @@ index.extendTerm("de");
 // => ["de"]
 ```
 
-### Vacuuming
+### <a name="vacuum"></a>Vacuuming
+
+Vacuuming is a process that will remove all outdated documents from an inverted index.
 
 `vacuum() => void`
 
