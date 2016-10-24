@@ -326,4 +326,11 @@ export class DocumentIndex<I, D> {
   expandTerm(term: string): string[] {
     return this._index.expandTerm(term);
   }
+
+  /**
+   * Remove outdated/removed documents from the index.
+   */
+  vacuum(): void {
+    this._index.vacuum();
+  }
 }

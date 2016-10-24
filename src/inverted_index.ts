@@ -54,7 +54,7 @@ function findChild<I>(node: InvertedIndexNode<I>, charCode: number): InvertedInd
  * Inverted Index implemented with a trie data structure.
  */
 export class InvertedIndex<I> {
-  root: InvertedIndexNode<I>;
+  private readonly root: InvertedIndexNode<I>;
 
   constructor() {
     this.root = new InvertedIndexNode<I>(0);
@@ -113,6 +113,13 @@ export class InvertedIndex<I> {
 
     return results;
   }
+
+  /**
+   * Remove outdated/removed documents from the index.
+   */
+  vacuum(): void {
+    _vacuum(this.root);
+  }
 }
 
 function _expandTerm<I>(node: InvertedIndexNode<I>, results: string[], term: string): void {
@@ -123,6 +130,34 @@ function _expandTerm<I>(node: InvertedIndexNode<I>, results: string[], term: str
     for (let i = 0; i < node.children.length; i++) {
       const child = node.children[i];
       _expandTerm(child, results, term + String.fromCharCode(child.charCode));
+    }
+  }
+}
+
+function _vacuum<I>(node: InvertedIndexNode<I>): void {
+  if (node.postings !== null) {
+    let removed = false;
+    for (let i = 0; i < node.postings.length; i++) {
+      if (node.postings[i].details.removed) {
+        removed = true;
+        break;
+      }
+    }
+    if (removed) {
+      const newPostings = [] as DocumentPointer<I>[];
+      for (let i = 0; i < node.postings.length; i++) {
+        const pointer = node.postings[i];
+        if (!pointer.details.removed) {
+          newPostings.push(pointer);
+        }
+      }
+      node.postings = newPostings.length === 0 ? null : newPostings;
+    }
+  }
+
+  if (node.children !== null) {
+    for (let i = 0; i < node.children.length; i++) {
+      _vacuum(node.children[i]);
     }
   }
 }
