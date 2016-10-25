@@ -1,6 +1,14 @@
 [ndx](http://github.com/localvoid/ndx) is a lightweight javascript (TypeScript) full-text indexing and searching
 library.
 
+## Live Demo
+
+[Reddit Comments Search Engine](https://localvoid.github.io/ndx-demo/) - is a simple demo application that indexes
+10,000 reddit comments. Demo application requires modern browser features:
+[WebWorkers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API) and
+[IndexedDB](https://developer.mozilla.org/en/docs/Web/API/IndexedDB_API). Comments are stored in the IndexedDB,
+and search engine is working in a WebWorker.
+
 ## Features
 
 - Multiple fields full-text indexing and searching.
@@ -13,6 +21,10 @@ library.
 - Free text queries with query expansion.
 - Small memory footprint.
 - ~1.7kb minified and gzipped.
+
+ndx library doesn't provide any advanced text processing functions, default tokenizer breaks words on space characters,
+and default filter just removes non-word character. [Natural](https://github.com/NaturalNode/natural/) is a good library
+that has many useful functions for text processing.
 
 ## NPM Package
 
