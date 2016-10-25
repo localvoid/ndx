@@ -1,5 +1,5 @@
 import { DocumentDetails } from "./document";
-import { InvertedIndex } from "./inverted_index";
+import { InvertedIndex, DocumentPointer } from "./inverted_index";
 import { whitespaceTokenizer } from "./tokenizer";
 import { lowerCaseFilter, trimNonWordCharactersFilter } from "./filters";
 
@@ -44,7 +44,7 @@ export interface FieldOptions<D> {
   /**
    * Score boosting factor.
    */
-  readonly boost: number;
+  readonly boost?: number;
 }
 
 /**
@@ -264,40 +264,43 @@ export class DocumentIndex<I, D> {
           const expansionBoost = eTerm === term ? 1 : Math.log(1 + (1 / (eTerm.length - term.length)));
           const termNode = this._index.get(eTerm);
 
-          let postings = termNode === null ? null : termNode.postings;
-
-          if (postings !== null) {
+          if (termNode !== null && termNode.firstPosting !== null) {
             let documentFrequency = 0;
-            for (let k = 0; k < postings.length; k++) {
-              if (!postings[k].details.removed) {
+            let pointer: DocumentPointer<I> | null = termNode.firstPosting;
+            while (pointer !== null) {
+              if (!pointer.details.removed) {
                 documentFrequency++;
               }
+              pointer = pointer.next;
             }
 
-            // calculating BM25 idf
-            const idf = Math.log(1 + (this.size - documentFrequency + 0.5) / (documentFrequency + 0.5));
+            if (documentFrequency > 0) {
+              // calculating BM25 idf
+              const idf = Math.log(1 + (this.size - documentFrequency + 0.5) / (documentFrequency + 0.5));
 
-            for (let k = 0; k < postings.length; k++) {
-              const pointer = postings[k];
-              if (!pointer.details.removed) {
-                let score = 0;
-                for (let x = 0; x < pointer.details.fieldLengths.length; x++) {
-                  let tf = pointer.termFrequency[x];
-                  if (tf > 0) {
-                    // calculating BM25 tf
-                    const fieldLength = pointer.details.fieldLengths[x];
-                    const fieldDetails = this._fields[x]
-                    const avgFieldLength = fieldDetails.avgLength;
-                    const k1 = this._bm25k1;
-                    const b = this._bm25b;
-                    tf = ((k1 + 1) * tf) / (k1 * ((1 - b) + b * (fieldLength / avgFieldLength)) + tf);
-                    score += tf * idf * fieldDetails.boost * expansionBoost;
+              pointer = termNode.firstPosting;
+              while (pointer !== null) {
+                if (!pointer.details.removed) {
+                  let score = 0;
+                  for (let x = 0; x < pointer.details.fieldLengths.length; x++) {
+                    let tf = pointer.termFrequency[x];
+                    if (tf > 0) {
+                      // calculating BM25 tf
+                      const fieldLength = pointer.details.fieldLengths[x];
+                      const fieldDetails = this._fields[x]
+                      const avgFieldLength = fieldDetails.avgLength;
+                      const k1 = this._bm25k1;
+                      const b = this._bm25b;
+                      tf = ((k1 + 1) * tf) / (k1 * ((1 - b) + b * (fieldLength / avgFieldLength)) + tf);
+                      score += tf * idf * fieldDetails.boost * expansionBoost;
+                    }
+                  }
+                  if (score > 0) {
+                    const prevScore = scores.get(pointer.details.docId);
+                    scores.set(pointer.details.docId, prevScore === undefined ? score : prevScore + score);
                   }
                 }
-                if (score > 0) {
-                  const prevScore = scores.get(pointer.details.docId);
-                  scores.set(pointer.details.docId, prevScore === undefined ? score : prevScore + score);
-                }
+                pointer = pointer.next;
               }
             }
           }

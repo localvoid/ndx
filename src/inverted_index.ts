@@ -1,6 +1,7 @@
 import { DocumentDetails } from "./document";
 
 export interface DocumentPointer<I> {
+  next: DocumentPointer<I> | null;
   readonly details: DocumentDetails<I>;
   readonly termFrequency: number[];
 }
@@ -10,13 +11,15 @@ export interface DocumentPointer<I> {
  */
 export class InvertedIndexNode<I> {
   readonly charCode: number;
-  postings: DocumentPointer<I>[] | null;
-  children: InvertedIndexNode<I>[] | null;
+  next: InvertedIndexNode<I> | null;
+  firstChild: InvertedIndexNode<I> | null;
+  firstPosting: DocumentPointer<I> | null;
 
   constructor(charCode: number) {
     this.charCode = charCode;
-    this.postings = null;
-    this.children = null;
+    this.next = null;
+    this.firstChild = null;
+    this.firstPosting = null;
   }
 }
 
@@ -26,10 +29,12 @@ export class InvertedIndexNode<I> {
 function createNodes<I>(parent: InvertedIndexNode<I>, term: string, start: number): InvertedIndexNode<I> {
   for (; start < term.length; start++) {
     const newNode = new InvertedIndexNode<I>(term.charCodeAt(start));
-    if (parent.children === null) {
-      parent.children = [];
+    if (parent.firstChild === null) {
+      parent.firstChild = newNode;
+    } else {
+      newNode.next = parent.firstChild;
+      parent.firstChild = newNode;
     }
-    parent.children.push(newNode);
     parent = newNode;
   }
   return parent;
@@ -39,13 +44,12 @@ function createNodes<I>(parent: InvertedIndexNode<I>, term: string, start: numbe
  * Find trie child node that matches `charCode`.
  */
 function findChild<I>(node: InvertedIndexNode<I>, charCode: number): InvertedIndexNode<I> | undefined {
-  if (node.children !== null) {
-    for (let i = 0; i < node.children.length; i++) {
-      const child = node.children[i];
-      if (child.charCode === charCode) {
-        return child;
-      }
+  let child = node.firstChild;
+  while (child !== null) {
+    if (child.charCode === charCode) {
+      return child;
     }
+    child = child.next;
   }
   return undefined;
 }
@@ -80,7 +84,7 @@ export class InvertedIndex<I> {
     let node = this.root;
 
     for (let i = 0; i < term.length; i++) {
-      if (node.children === null) {
+      if (node.firstChild === null) {
         node = createNodes(node, term, i);
         break;
       }
@@ -92,13 +96,18 @@ export class InvertedIndex<I> {
       node = nextNode;
     }
 
-    if (node.postings === null) {
-      node.postings = [];
-    }
-    node.postings.push({
+    const pointer = {
+      next: null,
       details: docDetails,
       termFrequency: termFrequency,
-    });
+    } as DocumentPointer<I>;
+
+    if (node.firstPosting === null) {
+      node.firstPosting = pointer;
+    } else {
+      pointer.next = node.firstPosting;
+      node.firstPosting = pointer;
+    }
   }
 
   /**
@@ -123,41 +132,35 @@ export class InvertedIndex<I> {
 }
 
 function _expandTerm<I>(node: InvertedIndexNode<I>, results: string[], term: string): void {
-  if (node.postings !== null && node.postings.length > 0) {
+  if (node.firstPosting !== null && node.firstPosting !== null) {
     results.push(term);
   }
-  if (node.children !== null) {
-    for (let i = 0; i < node.children.length; i++) {
-      const child = node.children[i];
-      _expandTerm(child, results, term + String.fromCharCode(child.charCode));
-    }
+  let child = node.firstChild;
+  while (child !== null) {
+    _expandTerm(child, results, term + String.fromCharCode(child.charCode));
+    child = child.next;
   }
 }
 
 function _vacuum<I>(node: InvertedIndexNode<I>): void {
-  if (node.postings !== null) {
-    let removed = false;
-    for (let i = 0; i < node.postings.length; i++) {
-      if (node.postings[i].details.removed) {
-        removed = true;
-        break;
+  let prevPointer: DocumentPointer<I> | null = null;
+  let pointer = node.firstPosting;
+  while (pointer !== null) {
+    if (pointer.details.removed) {
+      if (prevPointer === null) {
+        node.firstPosting = pointer.next;
+      } else {
+        prevPointer.next = pointer.next;
       }
+    } else {
+      prevPointer = pointer;
     }
-    if (removed) {
-      const newPostings = [] as DocumentPointer<I>[];
-      for (let i = 0; i < node.postings.length; i++) {
-        const pointer = node.postings[i];
-        if (!pointer.details.removed) {
-          newPostings.push(pointer);
-        }
-      }
-      node.postings = newPostings.length === 0 ? null : newPostings;
-    }
+    pointer = pointer.next;
   }
 
-  if (node.children !== null) {
-    for (let i = 0; i < node.children.length; i++) {
-      _vacuum(node.children[i]);
-    }
+  let child = node.firstChild;
+  while (child !== null) {
+    _vacuum(child);
+    child = child.next;
   }
 }
