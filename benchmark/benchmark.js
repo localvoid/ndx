@@ -1,6 +1,5 @@
 const fs = require("fs");
 const ndx = require("../dist/umd/ndx");
-const stemr = require("stemr");
 
 function measure(name, fn) {
   const t1 = process.hrtime();
@@ -16,9 +15,6 @@ console.log("Documents:", data.length);
 const index = new ndx.DocumentIndex();
 index.addField("author");
 index.addField("body");
-index.setFilter(function (t) {
-  return stemr.stem(ndx.DEFAULT_FILTER(t));
-});
 
 if (global.gc !== undefined) {
   gc();
