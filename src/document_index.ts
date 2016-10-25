@@ -268,8 +268,17 @@ export class DocumentIndex<I, D> {
           if (termNode !== null && termNode.firstPosting !== null) {
             let documentFrequency = 0;
             let pointer: DocumentPointer<I> | null = termNode.firstPosting;
+            let prevPointer: DocumentPointer<I> | null = null;
+
             while (pointer !== null) {
-              if (!pointer.details.removed) {
+              if (pointer.details.removed) {
+                if (prevPointer === null) {
+                  termNode.firstPosting = pointer.next;
+                } else {
+                  prevPointer.next = pointer.next;
+                }
+              } else {
+                prevPointer = pointer;
                 documentFrequency++;
               }
               pointer = pointer.next;
