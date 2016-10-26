@@ -262,7 +262,7 @@ export class DocumentIndex<I, D> {
         const documents = new Set<I>();
         for (let j = 0; j < expandedTerms.length; j++) {
           const eTerm = expandedTerms[j];
-          const expansionBoost = eTerm === term ? 1 : Math.log(1 + (1 / (eTerm.length - term.length)));
+          const expansionBoost = eTerm === term ? 1 : Math.log(1 + (1 / (1 + eTerm.length - term.length)));
           const termNode = this._index.get(eTerm);
 
           if (termNode !== null && termNode.firstPosting !== null) {
@@ -290,7 +290,7 @@ export class DocumentIndex<I, D> {
 
               pointer = termNode.firstPosting;
               while (pointer !== null) {
-                if (!pointer.details.removed && !documents.has(pointer.details.docId)) {
+                if (!pointer.details.removed) {
                   let score = 0;
                   for (let x = 0; x < pointer.details.fieldLengths.length; x++) {
                     let tf = pointer.termFrequency[x];
@@ -306,9 +306,14 @@ export class DocumentIndex<I, D> {
                     }
                   }
                   if (score > 0) {
-                    const prevScore = scores.get(pointer.details.docId);
-                    scores.set(pointer.details.docId, prevScore === undefined ? score : prevScore + score);
-                    documents.add(pointer.details.docId);
+                    const docId = pointer.details.docId;
+                    const prevScore = scores.get(docId);
+                    if (prevScore !== undefined && documents.has(docId)) {
+                      scores.set(docId, Math.max(prevScore, score));
+                    } else {
+                      scores.set(docId, prevScore === undefined ? score : prevScore + score);
+                    }
+                    documents.add(docId);
                   }
                 }
                 pointer = pointer.next;
