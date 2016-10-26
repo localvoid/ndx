@@ -75,6 +75,7 @@ index.search("Lorem");
 - [Adding a document to an index](#add_doc)
 - [Removing a document from an index](#remove_doc)
 - [Search with a free text query](#search)
+- [Extending a term](#extend_term)
 - [Converting query to terms](#convert_query)
 - [Vacuuming](#vacuum)
 
@@ -347,7 +348,7 @@ index.search("dolor");
 // => [{ docId: "1" }]
 ```
 
-### Extending a term
+### <a name="extend_term"></a>Extending a term
 
 Extend a term with all possible combinations starting from a `term` that is registered in an index.
 
