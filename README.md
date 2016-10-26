@@ -1,3 +1,7 @@
+[![Npm version](https://img.shields.io/npm/v/ndx.svg?style=flat-square)](https://www.npmjs.com/package/ndx)
+[![Npm downloads](https://img.shields.io/npm/dm/ndx.svg?style=flat-square)](https://www.npmjs.com/package/ndx)
+[![License](https://img.shields.io/npm/l/ndx.svg?style=flat-square)](https://www.npmjs.com/package/ndx)
+
 [ndx](http://github.com/localvoid/ndx) is a lightweight javascript (TypeScript) full-text indexing and searching
 library.
 
