@@ -346,7 +346,7 @@ export class DocumentIndex<I, D> {
   }
 
   /**
-   * Convert query to terms array.
+   * Convert query to an array of terms.
    */
   queryToTerms(query: string): string[] {
     let result = [] as string[];

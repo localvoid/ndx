@@ -75,6 +75,7 @@ index.search("Lorem");
 - [Adding a document to an index](#add_doc)
 - [Removing a document from an index](#remove_doc)
 - [Search with a free text query](#search)
+- [Converting query to terms](#convert_query)
 - [Vacuuming](#vacuum)
 
 ### <a name="create_index"></a>Creating a new Document Index
@@ -382,6 +383,40 @@ index.extendTerm("abc");
 
 index.extendTerm("de");
 // => ["de"]
+```
+
+### <a name="convert_query"></a>Converting query to terms
+
+Convert a query to an array of terms with the same tokenizer and filters that are used in a DocumentIndex.
+
+Converting queries are useful for implementing search highlighting feature.
+
+`queryToTerms(query: string) => string[]`
+
+#### Example
+
+```js
+const index = new DocumentIndex();
+
+index.addField("content");
+
+const doc1 = {
+  "id": "1",
+  "content": "abc abcde",
+};
+const doc2 = {
+  "id": "2",
+  "content": "ab de",
+};
+
+index.add(doc1.id, doc1);
+index.add(doc2.id, doc2);
+
+/**
+ * Convert a query to an array of terms.
+ */
+index.queryToTerms("a d");
+// => ["ab", "abc", "abcde", "de"]
 ```
 
 ### <a name="vacuum"></a>Vacuuming
