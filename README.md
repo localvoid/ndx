@@ -388,6 +388,9 @@ index.extendTerm("de");
 
 Vacuuming is a process that will remove all outdated documents from an inverted index.
 
+When search is performed, all outdated documents will be automatically removed for all terms generated from a search
+query.
+
 `vacuum() => void`
 
 #### Example
