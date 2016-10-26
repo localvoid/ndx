@@ -346,6 +346,22 @@ export class DocumentIndex<I, D> {
   }
 
   /**
+   * Convert query to terms array.
+   */
+  queryToTerms(query: string): string[] {
+    let result = [] as string[];
+    const tokens = this._tokenizer(query);
+    for (let i = 0; i < tokens.length; i++) {
+      const term = this._filter(tokens[i]);
+      if (term !== "") {
+        result = result.concat(this._index.expandTerm(term));
+      }
+    }
+
+    return result;
+  }
+
+  /**
    * Remove outdated/removed documents from the index.
    */
   vacuum(): void {
