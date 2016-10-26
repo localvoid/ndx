@@ -3,7 +3,7 @@
   "main": "dist/umd/ndx.js",
   "module": "dist/es6/ndx.js",
   "typings": "dist/typings/ndx.d.ts",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "Lightweight full-text searching and indexing library.",
   "license": "MIT",
   "author": {

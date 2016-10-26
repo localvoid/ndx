@@ -27,6 +27,21 @@ export interface BM25Options {
  */
 export interface DocumentIndexOptions {
   /**
+   * Tokenizer is a function that breaks a text into words, phrases, symbols, or other meaningful elements called
+   * tokens.
+   *
+   * Default tokenizer breaks words on spaces, tabs, line feeds and assumes that contiguous nonwhitespace characters
+   * form a single token.
+   */
+  readonly tokenizer?: (query: string) => string[];
+  /**
+   * Filter is a function that processes tokens and returns terms, terms are used in Inverted Index to index documents.
+   *
+   * Default filter transforms all characters to lower case and removes all non-word characters at the beginning and
+   * the end of a term.
+   */
+  readonly filter?: (term: string) => string;
+  /**
    * BM25 Ranking function constants.
    */
   readonly bm25?: BM25Options;
@@ -71,7 +86,7 @@ interface FieldDetails<D> {
   /**
    * Score boosting factor.
    */
-  boost: number;
+  readonly boost: number;
   /**
    * Sum of field lengths in all documents.
    */
@@ -90,13 +105,13 @@ export function DEFAULT_FILTER(term: string): string {
  * Document Index.
  */
 export class DocumentIndex<I, D> {
-  private _documents: Map<I, DocumentDetails<I>>;
-  private _index: InvertedIndex<I>;
-  private _fields: FieldDetails<D>[];
-  private _tokenizer: (text: string) => string[];
-  private _filter: (term: string) => string;
-  private _bm25k1: number;
-  private _bm25b: number;
+  private readonly _documents: Map<I, DocumentDetails<I>>;
+  private readonly _index: InvertedIndex<I>;
+  private readonly _fields: FieldDetails<D>[];
+  private readonly _tokenizer: (text: string) => string[];
+  private readonly _filter: (term: string) => string;
+  private readonly _bm25k1: number;
+  private readonly _bm25b: number;
 
   constructor(options?: DocumentIndexOptions) {
     this._documents = new Map();
@@ -108,6 +123,12 @@ export class DocumentIndex<I, D> {
     this._bm25b = 0.75;
 
     if (options !== undefined) {
+      if (options.tokenizer !== undefined) {
+        this._tokenizer = options.tokenizer;
+      }
+      if (options.filter !== undefined) {
+        this._filter;
+      }
       const bm25 = options.bm25;
       if (bm25 !== undefined) {
         if (bm25.k1 !== undefined) {
@@ -131,17 +152,15 @@ export class DocumentIndex<I, D> {
    * Create Field Index.
    */
   addField(fieldName: string, options?: FieldOptions<D>): void {
-    let getter: ((document: D) => string) | string | undefined;
-    let boost: number | undefined;
+    let getter: ((document: D) => string) | string = fieldName;
+    let boost: number = 1;
     if (options !== undefined) {
-      getter = options.getter;
-      boost = options.boost;
-    }
-    if (getter === undefined) {
-      getter = fieldName;
-    }
-    if (boost === undefined) {
-      boost = 1;
+      if (options.getter !== undefined) {
+        getter = options.getter;
+      }
+      if (options.boost !== undefined) {
+        boost = options.boost;
+      }
     }
 
     const details: FieldDetails<D> = {
@@ -153,24 +172,6 @@ export class DocumentIndex<I, D> {
     };
 
     this._fields.push(details);
-  }
-
-  /**
-   * Set Text Tokenizer.
-   *
-   * Tokenizer is a simple function that accepts string values and returns array of string.
-   */
-  setTokenizer(tokenizer: (text: string) => string[]): void {
-    this._tokenizer = tokenizer;
-  }
-
-  /**
-   * Set Token Filter.
-   *
-   * Token filter will be applied to all tokens returned by tokenizer.
-   */
-  setFilter(filter: (token: string) => string): void {
-    this._filter = filter;
   }
 
   /**
