@@ -12,10 +12,11 @@ function clean() {
 }
 
 function test() {
-  require("ts-node/register");
-
   return gulp.src("tests/**/*.spec.ts", { read: false })
-    .pipe(mocha({ reporter: "progress" }));
+    .pipe(mocha({
+      reporter: "progress",
+      compilers: "ts:ts-node/register",
+    }));
 }
 
 function buildES5() {
@@ -44,13 +45,22 @@ function buildES6() {
   ]);
 }
 
-function distES5() {
+function distUMD() {
   return rollup.rollup({
     entry: "build/es5/ndx.js",
   }).then((bundle) => bundle.write({
     format: "umd",
     moduleName: "ndx",
     dest: "dist/umd/ndx.js",
+  }));
+}
+
+function distES5() {
+  return rollup.rollup({
+    entry: "build/es5/ndx.js",
+  }).then((bundle) => bundle.write({
+    format: "es",
+    dest: "dist/es5/ndx.js",
   }));
 }
 
@@ -75,7 +85,7 @@ function minifyUMD() {
     .pipe(gulp.dest("dist/umd"));
 }
 
-const dist = series(parallel(buildES5, buildES6), parallel(distES5, distES6), minifyUMD);
+const dist = series(parallel(buildES5, buildES6), parallel(distUMD, distES5, distES6), minifyUMD);
 
 exports.clean = clean;
 exports.test = test;
