@@ -1,26 +1,28 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "es2016",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "declaration": false,
+    "sourceMap": true,
+    "inlineSourceMap": true,
+    "importHelpers": true,
+    "noEmitHelpers": true,
+    "removeComments": false,
+    "lib": [
+      "es2016",
+      "es2015"
+    ],
     "types": [
-      "node",
-      "chai",
       "mocha"
     ],
-    "lib": [
-      "es6"
-    ],
-    "outDir": "build/es6",
-    "noImplicitAny": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
     "noImplicitReturns": true,
-    "noImplicitThis": true,
-    "noUnusedLocals": true,
-    "strictNullChecks": true,
-    "removeComments": false,
-    "moduleResolution": "node"
+    "noUnusedLocals": true
   },
   "include": [
     "src/**/*.ts",
-    "tests/**/*.ts"
-  ],
-  "compileOnSave": false
+    "__tests__/**/*.ts"
+  ]
 }

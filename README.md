@@ -32,10 +32,7 @@ that has many useful functions for text processing.
 
 ## NPM Package
 
-Npm package `ndx` provides umd module, es6 module and TypeScript typings.
-
-Umd module has a minified version, and it can be downloaded from unkpg cdn via
-https://unpkg.com/ndx@^0.1/dist/umd/ndx.min.js url.
+Npm package `ndx` provides commonjs, es5 and es6 modules with TypeScript typings.
 
 ## Example
 

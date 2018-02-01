@@ -16,8 +16,8 @@ const DOCS = [
     id: "c",
     title: "c",
     body: "sit amet",
-  }
-]
+  },
+];
 
 describe("DocumentIndex", () => {
   describe("empty", () => {

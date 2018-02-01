@@ -1,6 +1,8 @@
 import { expect } from "chai";
 import { InvertedIndex, InvertedIndexNode } from "../src/inverted_index";
 
+/* tslint:disable:no-unused-expression */
+
 describe("InvertedIndex", () => {
   describe("empty", () => {
     it("should return `null` when term doesn't exist", () => {

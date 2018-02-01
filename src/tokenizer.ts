@@ -6,4 +6,4 @@ const WHITESPACE_RE = /[\s]+/;
  */
 export function whitespaceTokenizer(text: string): string[] {
   return text.trim().split(WHITESPACE_RE);
-};
+}

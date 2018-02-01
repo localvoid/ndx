@@ -127,7 +127,7 @@ export class DocumentIndex<I, D> {
         this._tokenizer = options.tokenizer;
       }
       if (options.filter !== undefined) {
-        this._filter;
+        this._filter = options.filter;
       }
       const bm25 = options.bm25;
       if (bm25 !== undefined) {
@@ -153,7 +153,7 @@ export class DocumentIndex<I, D> {
    */
   addField(fieldName: string, options?: FieldOptions<D>): void {
     let getter: ((document: D) => string) | string = fieldName;
-    let boost: number = 1;
+    let boost = 1;
     if (options !== undefined) {
       if (options.getter !== undefined) {
         getter = options.getter;
@@ -219,7 +219,7 @@ export class DocumentIndex<I, D> {
       docId: documentId,
       removed: false,
       fieldLengths: documentTermCounts,
-    }
+    };
 
     this._documents.set(documentId, docDetails);
     termCounts.forEach((termCounters, term) => {
@@ -298,7 +298,7 @@ export class DocumentIndex<I, D> {
                     if (tf > 0) {
                       // calculating BM25 tf
                       const fieldLength = pointer.details.fieldLengths[x];
-                      const fieldDetails = this._fields[x]
+                      const fieldDetails = this._fields[x];
                       const avgFieldLength = fieldDetails.avgLength;
                       const k1 = this._bm25k1;
                       const b = this._bm25b;
