@@ -20,7 +20,7 @@ module.exports = {
   moduleFileExtensions: ["ts", "js", "json"],
   coverageReporters: ["text", "json", "lcov", "html"],
   collectCoverageFrom: [
-    "packages/**/src/**/*.ts",
+    "src/**/*.ts",
     "!**/node_modules/**",
     "!**/__tests__/**",
   ],
