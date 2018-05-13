@@ -1,10 +1,10 @@
 {
   "name": "ndx",
   "version": "0.4.1",
-  "main": "dist/main/ndx.js",
-  "module": "dist/module/ndx.js",
-  "es2015": "dist/es2015/ndx.js",
-  "typings": "dist/typings/ndx.d.ts",
+  "main": "dist/main/index.js",
+  "module": "dist/module/index.js",
+  "es2015": "dist/es2015/index.js",
+  "typings": "dist/typings/index.d.ts",
   "description": "Lightweight full-text searching and indexing library.",
   "scripts": {
     "clean": "rm -rf ./dist",
