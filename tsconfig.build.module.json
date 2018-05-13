@@ -2,9 +2,8 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "target": "es5",
-    "module": "commonjs",
-    "outDir": "dist/cjs",
-    "declaration": false,
+    "module": "es2015",
+    "outDir": "dist/module",
     "sourceMap": true,
     "inlineSourceMap": false,
     "importHelpers": true,
@@ -12,5 +11,8 @@
   },
   "include": [
     "src/**/*.ts"
+  ],
+  "exclude": [
+    "**/__tests__"
   ]
 }

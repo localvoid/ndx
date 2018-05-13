@@ -1,5 +1,4 @@
-import { expect } from "chai";
-import { DocumentIndex } from "../src/document_index";
+import { DocumentIndex } from "../document_index";
 
 const DOCS = [
   {
@@ -21,19 +20,19 @@ const DOCS = [
 
 describe("DocumentIndex", () => {
   describe("empty", () => {
-    it("should have size 0", () => {
+    test("should have size 0", () => {
       const idx = new DocumentIndex<string, { id: string, title: string, body: string }>();
-      expect(idx.size).to.be.equal(0);
+      expect(idx.size).toBe(0);
     });
 
-    it("should perform search queries", () => {
+    test("should perform search queries", () => {
       const idx = new DocumentIndex<string, { id: string, title: string, body: string }>();
-      expect(idx.search("a")).to.be.eql([]);
+      expect(idx.search("a")).toEqual([]);
     });
   });
 
   describe("multiple docs", () => {
-    it("should index multiple fields", () => {
+    test("should index multiple fields", () => {
       const idx = new DocumentIndex<string, { id: string, title: string, body: string }>();
       idx.addField("title");
       idx.addField("body");
@@ -42,21 +41,21 @@ describe("DocumentIndex", () => {
       });
 
       let result = idx.search("lorem");
-      expect(result.length).to.be.equal(2);
-      expect(result[0].docId).to.be.equal("b");
-      expect(result[1].docId).to.be.equal("a");
+      expect(result.length).toBe(2);
+      expect(result[0].docId).toBe("b");
+      expect(result[1].docId).toBe("a");
 
       result = idx.search("b");
-      expect(result.length).to.be.equal(1);
-      expect(result[0].docId).to.be.equal("b");
+      expect(result.length).toBe(1);
+      expect(result[0].docId).toBe("b");
 
       result = idx.search("a");
-      expect(result.length).to.be.equal(2);
-      expect(result[0].docId).to.be.equal("a");
-      expect(result[1].docId).to.be.equal("c");
+      expect(result.length).toBe(2);
+      expect(result[0].docId).toBe("a");
+      expect(result[1].docId).toBe("c");
     });
 
-    it("should remove documents", () => {
+    test("should remove documents", () => {
       const idx = new DocumentIndex<string, { id: string, title: string, body: string }>();
       idx.addField("title");
       idx.addField("body");
@@ -66,12 +65,12 @@ describe("DocumentIndex", () => {
       idx.remove("a");
 
       let result = idx.search("lorem");
-      expect(result.length).to.be.equal(1);
-      expect(result[0].docId).to.be.equal("b");
+      expect(result.length).toBe(1);
+      expect(result[0].docId).toBe("b");
 
       result = idx.search("a");
-      expect(result.length).to.be.equal(1);
-      expect(result[0].docId).to.be.equal("c");
+      expect(result.length).toBe(1);
+      expect(result[0].docId).toBe("c");
     });
   });
 });
