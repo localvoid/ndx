@@ -1,9 +1,6 @@
-[![Npm version](https://img.shields.io/npm/v/ndx.svg?style=flat-square)](https://www.npmjs.com/package/ndx)
-[![Npm downloads](https://img.shields.io/npm/dm/ndx.svg?style=flat-square)](https://www.npmjs.com/package/ndx)
-[![License](https://img.shields.io/npm/l/ndx.svg?style=flat-square)](https://www.npmjs.com/package/ndx)
+# [ndx](https://github.com/localvoid/ndx) &middot; [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/localvoid/ndx/blob/master/LICENSE) [![npm version](https://img.shields.io/npm/v/ndx.svg)](https://www.npmjs.com/package/ndx) [![codecov](https://codecov.io/gh/localvoid/ndx/branch/master/graph/badge.svg)](https://codecov.io/gh/localvoid/ndx) [![CircleCI Status](https://circleci.com/gh/localvoid/ndx.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/localvoid/ndx) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/localvoid/ndx)
 
-[ndx](http://github.com/localvoid/ndx) is a lightweight javascript (TypeScript) full-text indexing and searching
-library.
+ndx is a lightweight javascript (TypeScript) full-text indexing and searching library.
 
 ## Live Demo
 
