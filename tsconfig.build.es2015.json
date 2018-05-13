@@ -1,19 +1,8 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "./tsconfig.build.json",
   "compilerOptions": {
+    "target": "es2016",
     "module": "es2015",
-    "outDir": "dist/es2015",
-    "declarationDir": "dist/typings",
-    "declaration": true,
-    "sourceMap": true,
-    "inlineSourceMap": false,
-    "importHelpers": true,
-    "noEmitHelpers": true
-  },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "**/__tests__"
-  ]
+    "outDir": "dist/es2016"
+  }
 }

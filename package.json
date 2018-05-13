@@ -7,7 +7,8 @@
   "typings": "dist/typings/ndx.d.ts",
   "description": "Lightweight full-text searching and indexing library.",
   "scripts": {
-    "dist": "rm -rf ./dist && yarn dist:main && yarn dist:module && yarn dist:es2015",
+    "clean": "rm -rf ./dist",
+    "dist": "yarn dist:main && yarn dist:module && yarn dist:es2015",
     "dist:es2015": "tsc --project ./tsconfig.build.es2015.json",
     "dist:module": "tsc --project ./tsconfig.build.module.json",
     "dist:main": "tsc --project ./tsconfig.build.main.json",

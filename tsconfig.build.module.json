@@ -1,18 +1,9 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "./tsconfig.build.json",
   "compilerOptions": {
     "target": "es5",
     "module": "es2015",
-    "outDir": "dist/module",
-    "sourceMap": true,
-    "inlineSourceMap": false,
-    "importHelpers": true,
-    "noEmitHelpers": true
-  },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "**/__tests__"
-  ]
+    "moduleResolution": "node",
+    "outDir": "dist/module"
+  }
 }
