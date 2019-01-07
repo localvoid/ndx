@@ -21,6 +21,7 @@ and search engine is working in a WebWorker.
 - Configurable tokenizer and term filter.
 - Free text queries with query expansion.
 - Small memory footprint, optimized for mobile devices.
+- Serializable/deserializable index.
 - ~1.7kb minified and gzipped.
 
 ndx library doesn't provide any advanced text processing functions, default tokenizer breaks words on space characters,
@@ -73,6 +74,7 @@ index.search("Lorem");
 - [Search with a free text query](#search)
 - [Extending a term](#extend_term)
 - [Converting query to terms](#convert_query)
+- [Serializing / deserializing the Index](#serialize)
 - [Vacuuming](#vacuum)
 
 ### <a name="create_index"></a>Creating a new Document Index
@@ -386,6 +388,71 @@ index.add(doc2.id, doc2);
 index.queryToTerms("a d");
 // => ["ab", "abc", "abcde", "de"]
 ```
+
+### <a name="serialize"></a>Serializing / deserializing the Index
+
+For compatibility with browsers `serializer` and `serializer` functions work with `Uint8Array`, see code example below.
+
+#### Default indexing options
+
+```js
+const msgpack = require("msgpack-lite");
+const {writeFileSync, readFileSync} = require("fs");
+const {serialize, deserialize, DocumentIndex} = require("ndx");
+
+// in this example "msgpack-lite" is used for serialization and deserialization
+// but you can provide your own custom implementation
+const codec = msgpack.createCodec({binarraybuffer: true, preset: true});
+// converts state of the index to Uint8Array
+const serializer = (data) => msgpack.encode(data, {codec: codec});
+// parses argument of Uint8Array type to JSON
+const deserializer = (data) => msgpack.decode(data, {codec: codec});
+
+const index = new DocumentIndex();
+
+index.addField("content");
+
+const doc1 = {
+  "id": "1",
+  "content": "abc abcde",
+};
+const doc2 = {
+  "id": "2",
+  "content": "ab de",
+};
+
+index.add(doc1.id, doc1);
+index.add(doc2.id, doc2);
+
+// serializing
+const dumpFile = "./index.msp";
+const serializationDump = serialize(index, serializer);
+writeFileSync(dumpFile, serializationDump);
+
+// deserializing
+const deserializationDump = readFileSync(dumpFile);
+const deserializedIndex = deserialize(deserializationDump, deserializer);
+
+const query = "a d";
+
+// prints "true"
+console.log(
+  JSON.stringify(index.search(query))
+  ===
+  JSON.stringify(deserializedIndex.search(query))
+);
+
+// prints "true"
+console.log(
+  JSON.stringify(index.queryToTerms(query))
+  ===
+  JSON.stringify(deserializedIndex.queryToTerms(query))
+);
+```
+
+#### Custom indexing options
+
+The library doesn't serialize functions. So if you use custom `tokenizer`, `filter`, `field.getter` functions, then you will need to pass these functions to `deserialize` function call. See example in [src/__tests__/serialization.spec.ts](src/__tests__/serialization.spec.ts) test file. 
 
 ### <a name="vacuum"></a>Vacuuming
 

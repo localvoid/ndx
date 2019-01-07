@@ -1,4 +1,5 @@
 import { DocumentDetails } from "./document";
+import { Omit } from "./types";
 
 export interface DocumentPointer<I> {
   next: DocumentPointer<I> | null;
@@ -9,18 +10,11 @@ export interface DocumentPointer<I> {
 /**
  * Trie Node.
  */
-export class InvertedIndexNode<I> {
+export interface InvertedIndexNode<I> {
   readonly charCode: number;
   next: InvertedIndexNode<I> | null;
   firstChild: InvertedIndexNode<I> | null;
   firstPosting: DocumentPointer<I> | null;
-
-  constructor(charCode: number) {
-    this.charCode = charCode;
-    this.next = null;
-    this.firstChild = null;
-    this.firstPosting = null;
-  }
 }
 
 /**
@@ -28,7 +22,7 @@ export class InvertedIndexNode<I> {
  */
 function createNodes<I>(parent: InvertedIndexNode<I>, term: string, start: number): InvertedIndexNode<I> {
   for (; start < term.length; start++) {
-    const newNode = new InvertedIndexNode<I>(term.charCodeAt(start));
+    const newNode = constructInvertedIndexNode<I>(term.charCodeAt(start));
     if (parent.firstChild === null) {
       parent.firstChild = newNode;
     } else {
@@ -61,7 +55,7 @@ export class InvertedIndex<I> {
   private readonly root: InvertedIndexNode<I>;
 
   constructor() {
-    this.root = new InvertedIndexNode<I>(0);
+    this.root = constructInvertedIndexNode<I>(0);
   }
 
   /**
@@ -163,4 +157,11 @@ function _vacuum<I>(node: InvertedIndexNode<I>): void {
     _vacuum(child);
     child = child.next;
   }
+}
+
+function constructInvertedIndexNode<I>(
+  charCode: InvertedIndexNode<I>["charCode"],
+  {next = null, firstChild = null, firstPosting = null}: Partial<Omit<InvertedIndexNode<I>, "charCode">> = {},
+): InvertedIndexNode<I> {
+  return {charCode, next, firstChild, firstPosting};
 }
