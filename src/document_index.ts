@@ -373,6 +373,13 @@ export class DocumentIndex<I, D> {
   }
 
   /**
+   * Checks if document has been indexed
+   */
+  indexed(documentId: I): boolean {
+    return this._documents.has(documentId);
+  }
+
+  /**
    * Remove outdated/removed documents from the index.
    */
   vacuum(): void {
