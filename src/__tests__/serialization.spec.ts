@@ -19,8 +19,8 @@ interface Doc {
 }
 
 const codec = msgpack.createCodec({binarraybuffer: true, preset: true});
-const serializer: Serializer<Doc["id"], Doc> = (data) => msgpack.encode(data, {codec: codec});
-const deserializer: Deserializer<Doc["id"], Doc> = (data) => msgpack.decode(data, {codec: codec});
+const serializer: Serializer<Doc["id"], Doc> = (data) => msgpack.encode(data, {codec});
+const deserializer: Deserializer<Doc["id"], Doc> = (data) => msgpack.decode(data, {codec});
 
 describe("serialize/deserialize", () => {
   function buildTest(

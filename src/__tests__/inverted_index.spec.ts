@@ -1,4 +1,4 @@
-import { InvertedIndex } from "../inverted_index";
+import { InvertedIndex, InvertedIndexNode } from "../inverted_index";
 
 describe("InvertedIndex", () => {
   describe("empty", () => {
@@ -93,6 +93,6 @@ describe("InvertedIndex", () => {
   });
 });
 
-function isLikelyInstanceOfInvertedIndexNode(value: any): boolean {
-  return typeof value === "object" && typeof value.charCode === "number";
+function isLikelyInstanceOfInvertedIndexNode<I extends any = any>(arg: any): arg is InvertedIndexNode<I> {
+  return typeof arg === "object" && typeof arg.charCode === "number";
 }
