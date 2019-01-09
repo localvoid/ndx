@@ -175,8 +175,8 @@ export class DocumentIndex<I, D> {
 
     const details: FieldDetails<D> = {
       name: fieldName,
-      getter: getter,
-      boost: boost,
+      getter,
+      boost,
       sumLength: 0,
       avgLength: 0,
     };
@@ -339,7 +339,7 @@ export class DocumentIndex<I, D> {
     scores.forEach(function (score, documentId) {
       result.push({
         docId: documentId,
-        score: score,
+        score,
       });
     });
     result.sort(function (a, b) {
@@ -370,6 +370,13 @@ export class DocumentIndex<I, D> {
     }
 
     return result;
+  }
+
+  /**
+   * Checks if document has been indexed
+   */
+  indexed(documentId: I): boolean {
+    return this._documents.has(documentId);
   }
 
   /**

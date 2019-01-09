@@ -93,7 +93,7 @@ export class InvertedIndex<I> {
     const pointer = {
       next: null,
       details: docDetails,
-      termFrequency: termFrequency,
+      termFrequency,
     } as DocumentPointer<I>;
 
     if (node.firstPosting === null) {

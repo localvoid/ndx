@@ -404,9 +404,9 @@ const {serialize, deserialize, DocumentIndex} = require("ndx");
 // but you can provide your own custom implementation
 const codec = msgpack.createCodec({binarraybuffer: true, preset: true});
 // converts state of the index to Uint8Array
-const serializer = (data) => msgpack.encode(data, {codec: codec});
+const serializer = (data) => msgpack.encode(data, {codec});
 // parses argument of Uint8Array type to JSON
-const deserializer = (data) => msgpack.decode(data, {codec: codec});
+const deserializer = (data) => msgpack.decode(data, {codec});
 
 const index = new DocumentIndex();
 
