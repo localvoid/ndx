@@ -4,7 +4,7 @@ module.exports = {
   browser: false,
   globals: {
     "ts-jest": {
-      "tsConfigFile": "tsconfig.json",
+      "tsConfig": "tsconfig.json",
     },
   },
   transform: {
