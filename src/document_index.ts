@@ -101,17 +101,27 @@ export function DEFAULT_FILTER(term: string): string {
   return trimNonWordCharactersFilter(lowerCaseFilter(term));
 }
 
+export interface DocumentIndexState<I, D> {
+  _documents: Map<I, DocumentDetails<I>>;
+  _index: InvertedIndex<I>;
+  _fields: FieldDetails<D>[];
+  _tokenizer: (text: string) => string[];
+  _filter: (term: string) => string;
+  _bm25k1: number;
+  _bm25b: number;
+}
+
 /**
  * Document Index.
  */
 export class DocumentIndex<I, D> {
-  private readonly _documents: Map<I, DocumentDetails<I>>;
-  private readonly _index: InvertedIndex<I>;
-  private readonly _fields: FieldDetails<D>[];
-  private readonly _tokenizer: (text: string) => string[];
-  private readonly _filter: (term: string) => string;
-  private readonly _bm25k1: number;
-  private readonly _bm25b: number;
+  private readonly _documents: DocumentIndexState<I, D>["_documents"];
+  private readonly _index: DocumentIndexState<I, D>["_index"];
+  private readonly _fields: DocumentIndexState<I, D>["_fields"];
+  private readonly _tokenizer: DocumentIndexState<I, D>["_tokenizer"];
+  private readonly _filter: DocumentIndexState<I, D>["_filter"];
+  private readonly _bm25k1: DocumentIndexState<I, D>["_bm25k1"];
+  private readonly _bm25b: DocumentIndexState<I, D>["_bm25b"];
 
   constructor(options?: DocumentIndexOptions) {
     this._documents = new Map();
