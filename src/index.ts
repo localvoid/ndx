@@ -1,17 +1,22 @@
 /**
- * Index.
+ * Index data structure.
+ *
+ * This data structure is optimized for memory consumption and performant mutations during indexing, so it contains only
+ * basic information.
+ *
+ * @typeparam I Document ID type.
  */
 export interface Index<I> {
   /**
-   * Document details.
+   * Additional information about documents.
    */
   readonly documents: Map<I, DocumentDetails<I>>;
   /**
-   * Inverted index root.
+   * Inverted index root node.
    */
   readonly root: InvertedIndexNode<I>;
   /**
-   * Field details.
+   * Additional information about indexed fields in all documents.
    */
   readonly fields: FieldDetails[];
 }
@@ -19,6 +24,7 @@ export interface Index<I> {
 /**
  * Creates an Index.
  *
+ * @typeparam I Document ID type.
  * @param fieldsNum Number of fields.
  * @returns {@link Index}
  */
@@ -36,6 +42,8 @@ export function createIndex<I>(fieldsNum: number): Index<I> {
 
 /**
  * Document Details object stores additional information about documents.
+ *
+ * @typeparam I Document ID type.
  */
 export interface DocumentDetails<I> {
   /**
@@ -48,24 +56,58 @@ export interface DocumentDetails<I> {
   readonly fieldLengths: number[];
 }
 
+/**
+ * Document pointer contains information about term frequency for a document.
+ *
+ * @typeparam I Document ID type.
+ */
 export interface DocumentPointer<I> {
+  /**
+   * Next {@link DocumentPointer} in the intrusive linked list.
+   */
   next: DocumentPointer<I> | null;
+  /**
+   * Reference to a {@link DocumentDetails} object that is used for this document.
+   */
   readonly details: DocumentDetails<I>;
+  /**
+   * Term frequency in each field.
+   */
   readonly termFrequency: number[];
 }
 
 /**
- * Trie Node.
+ * Inverted Index Node.
+ *
+ * Inverted index is implemented with a [trie](https://en.wikipedia.org/wiki/Trie) data structure.
+ *
+ * @typeparam I Document ID type.
  */
 export interface InvertedIndexNode<I> {
+  /**
+   * Char code is used to store keys in the trie data structure.
+   */
   readonly charCode: number;
+  /**
+   * Next {@link InvertedIndexNode} in the intrusive linked list.
+   */
   next: InvertedIndexNode<I> | null;
+  /**
+   * Linked list of children {@link InvertedIndexNode}.
+   */
   firstChild: InvertedIndexNode<I> | null;
+  /**
+   * Linked list of documents associated with this node.
+   *
+   * Term `posting` is used in a traditional literature about information retrieval, see
+   * [Introduction to Information Retrieval](https://nlp.stanford.edu/IR-book/information-retrieval-book.html) for
+   * more details.
+   */
   firstPosting: DocumentPointer<I> | null;
 }
 
 /**
- * Field Details.
+ * Field Details contains additional information about fields.
  */
 export interface FieldDetails {
   /**
@@ -81,6 +123,7 @@ export interface FieldDetails {
 /**
  * Creates inverted index node.
  *
+ * @typeparam I Document ID type.
  * @param charCode Char code.
  * @returnd {@link InvertedIndexNode} instance.
  */
@@ -96,6 +139,7 @@ export function createInvertedIndexNode<I>(charCode: number): InvertedIndexNode<
 /**
  * Finds inverted index node that matches the `term`.
  *
+ * @typeparam I Document ID type.
  * @param node Root node.
  * @param term Term.
  * @returns Inverted index node that contains `term` or an `undefined` value.
@@ -113,6 +157,7 @@ export function findInvertedIndexNode<I>(
 /**
  * Finds inverted index child node with matching `charCode`.
  *
+ * @typeparam I Document ID type.
  * @param node {@link InvertedIndexNode}
  * @param charCode Char code.
  * @returns Matching {@link InvertedIndexNode} or `undefined`.
