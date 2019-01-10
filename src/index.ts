@@ -175,3 +175,17 @@ export function findInvertedIndexChildNodeByCharCode<I>(
   }
   return void 0;
 }
+
+/**
+ * Adds inverted index child node.
+ *
+ * @typeparam I Document ID type.
+ * @param parent Parent node.
+ * @param child Child node to add.
+ */
+export function addInvertedIndexChildNode<I>(parent: InvertedIndexNode<I>, child: InvertedIndexNode<I>): void {
+  if (parent.firstChild !== null) {
+    child.next = parent.firstChild;
+  }
+  parent.firstChild = child;
+}

@@ -1,15 +1,8 @@
 import {
-  createInvertedIndexNode, InvertedIndexNode, findInvertedIndexChildNodeByCharCode, findInvertedIndexNode,
+  createInvertedIndexNode, addInvertedIndexChildNode, findInvertedIndexChildNodeByCharCode, findInvertedIndexNode,
 } from "..";
 
 const create = (charCode: number) => createInvertedIndexNode<number>(charCode);
-
-function addChild(parent: InvertedIndexNode<number>, child: InvertedIndexNode<number>) {
-  if (parent.firstChild !== null) {
-    child.next = parent.firstChild;
-  }
-  parent.firstChild = child;
-}
 
 describe("createInvertedIndexNode", () => {
   test("inverted index node should be created with correct char code", () => {
@@ -43,8 +36,8 @@ describe("findInvertedIndexChildNodeByCharCode", () => {
     const p = create(0);
     const c1 = create(1);
     const c2 = create(2);
-    addChild(p, c1);
-    addChild(p, c2);
+    addInvertedIndexChildNode(p, c1);
+    addInvertedIndexChildNode(p, c2);
     expect(findInvertedIndexChildNodeByCharCode(p, 0)).toBeUndefined();
   });
 
@@ -52,8 +45,8 @@ describe("findInvertedIndexChildNodeByCharCode", () => {
     const p = create(0);
     const c1 = create(1);
     const c2 = create(2);
-    addChild(p, c1);
-    addChild(p, c2);
+    addInvertedIndexChildNode(p, c1);
+    addInvertedIndexChildNode(p, c2);
     expect(findInvertedIndexChildNodeByCharCode(p, 1)).toBe(c1);
     expect(findInvertedIndexChildNodeByCharCode(p, 2)).toBe(c2);
   });
@@ -70,9 +63,9 @@ describe("findInvertedIndexNode", () => {
     const a = create(97);
     const b = create(98);
     const c = create(99);
-    addChild(p, a);
-    addChild(a, b);
-    addChild(b, c);
+    addInvertedIndexChildNode(p, a);
+    addInvertedIndexChildNode(a, b);
+    addInvertedIndexChildNode(b, c);
     expect(findInvertedIndexNode(p, "abc")).toBe(c);
   });
 });
