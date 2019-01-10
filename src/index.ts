@@ -189,3 +189,17 @@ export function addInvertedIndexChildNode<I>(parent: InvertedIndexNode<I>, child
   }
   parent.firstChild = child;
 }
+
+/**
+ * Adds posting to inverted index node.
+ *
+ * @typeparam I Document ID type.
+ * @param node Inverted index node.
+ * @param posting Posting.
+ */
+export function addInvertedIndexPosting<I>(node: InvertedIndexNode<I>, posting: DocumentPointer<I>): void {
+  if (node.firstPosting !== null) {
+    posting.next = node.firstPosting;
+  }
+  node.firstPosting = posting;
+}

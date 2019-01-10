@@ -1,5 +1,6 @@
 import {
   createInvertedIndexNode, addInvertedIndexChildNode, findInvertedIndexChildNodeByCharCode, findInvertedIndexNode,
+  addInvertedIndexPosting,
 } from "..";
 
 const create = (charCode: number) => createInvertedIndexNode<number>(charCode);
@@ -67,5 +68,46 @@ describe("findInvertedIndexNode", () => {
     addInvertedIndexChildNode(a, b);
     addInvertedIndexChildNode(b, c);
     expect(findInvertedIndexNode(p, "abc")).toBe(c);
+  });
+});
+
+describe("addInvertedIndexPosting", () => {
+  test("should add one node", () => {
+    const n = create(0);
+    const p = {
+      next: null,
+      details: {
+        id: 0,
+        fieldLengths: [],
+      },
+      termFrequency: [],
+    };
+    addInvertedIndexPosting(n, p);
+    expect(n.firstPosting).toBe(p);
+  });
+
+  test("should add two nodes", () => {
+    const n = create(0);
+    const p1 = {
+      next: null,
+      details: {
+        id: 0,
+        fieldLengths: [],
+      },
+      termFrequency: [],
+    };
+    const p2 = {
+      next: null,
+      details: {
+        id: 0,
+        fieldLengths: [],
+      },
+      termFrequency: [],
+    };
+    addInvertedIndexPosting(n, p1);
+    addInvertedIndexPosting(n, p2);
+    expect(n.firstPosting).toBe(p2);
+    expect(p2.next).toBe(p1);
+    expect(p1.next).toBe(null);
   });
 });
