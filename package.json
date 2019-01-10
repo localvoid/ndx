@@ -1,12 +1,13 @@
 {
   "name": "ndx",
-  "version": "1.0.0-beta.0",
+  "version": "1.0.0-beta.1",
   "main": "dist/main/index.js",
   "module": "dist/module/index.js",
   "es2015": "dist/es2015/index.js",
   "typings": "dist/typings/index.d.ts",
   "description": "Lightweight full-text searching and indexing library.",
   "scripts": {
+    "prepublishOnly": "npm run clean && npm run dist",
     "clean": "rm -rf ./dist",
     "dist": "yarn dist:main && yarn dist:module && yarn dist:es2015",
     "dist:es2015": "tsc --project ./tsconfig.build.es2015.json",
