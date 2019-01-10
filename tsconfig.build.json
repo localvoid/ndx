@@ -1,18 +1,5 @@
 {
-  "extends": "./tsconfig.checks.json",
-  "compilerOptions": {
-    "moduleResolution": "node",
-    "declaration": false,
-    "sourceMap": true,
-    "importHelpers": true,
-    "noEmitHelpers": true,
-    "removeComments": false,
-    "downlevelIteration": true,
-    "lib": [
-      "es2015",
-      "es2016"
-    ]
-  },
+  "extends": "ndx-dev-commons/tsconfig.build.json",
   "include": [
     "src/**/*.ts"
   ],
