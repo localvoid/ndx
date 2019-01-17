@@ -3,6 +3,21 @@ import { createIndex, addDocumentToIndex, removeDocumentFromIndex, vacuumIndex }
 const tokenizer = (s: string) => s.split(" ");
 const filter = (s: string) => s;
 
+test("one simple document", () => {
+  const idx = createIndex(1);
+  const removed = new Set();
+  const docs = [
+    { id: 1, text: "a" },
+  ];
+  docs.forEach((doc) => {
+    addDocumentToIndex(idx, [(d) => d.text], tokenizer, filter, doc.id, doc);
+  });
+  removeDocumentFromIndex(idx, removed, 1);
+  vacuumIndex(idx, removed);
+
+  expect(idx).toMatchSnapshot();
+});
+
 test("two documents with shared terms", () => {
   const idx = createIndex(1);
   const removed = new Set();

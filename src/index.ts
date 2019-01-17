@@ -343,8 +343,9 @@ export function vacuumIndex<T>(index: Index<T>, removed: Set<T>): void {
  * @typeparam T Document key.
  * @param node {@link InvertedIndexNode}
  * @param removed Set of removed document ids.
+ * @returns `1` when subtree contains any document.
  */
-function _vacuumIndex<T>(node: InvertedIndexNode<T>, removed: Set<T>): void {
+function _vacuumIndex<T>(node: InvertedIndexNode<T>, removed: Set<T>): number {
   let prevPointer: DocumentPointer<T> | null = null;
   let pointer = node.firstDoc;
   while (pointer !== null) {
@@ -361,9 +362,23 @@ function _vacuumIndex<T>(node: InvertedIndexNode<T>, removed: Set<T>): void {
     pointer = pointer.next;
   }
 
+  let prevChild: InvertedIndexNode<T> | null = null;
   let child = node.firstChild;
+  let ret = node.firstDoc === null ? 0 : 1;
   while (child !== null) {
-    _vacuumIndex(child, removed);
+    const r = _vacuumIndex(child, removed);
+    ret |= r;
+    if (r === 0) { // subtree doesn't have any documents, remove this node
+      if (prevChild === null) {
+        node.firstChild = child.next;
+      } else {
+        prevChild.next = child.next;
+      }
+    } else {
+      prevChild = child;
+    }
     child = child.next;
   }
+
+  return ret;
 }

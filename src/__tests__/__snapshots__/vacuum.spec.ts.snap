@@ -1,5 +1,23 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`one simple document 1`] = `
+Object {
+  "docs": Map {},
+  "fields": Array [
+    Object {
+      "avg": NaN,
+      "sum": 0,
+    },
+  ],
+  "root": Object {
+    "charCode": 0,
+    "firstChild": null,
+    "firstDoc": null,
+    "next": null,
+  },
+}
+`;
+
 exports[`remove the same document twice 1`] = `
 Object {
   "docs": Map {
@@ -63,12 +81,7 @@ Object {
               1,
             ],
           },
-          "next": Object {
-            "charCode": 97,
-            "firstChild": null,
-            "firstDoc": null,
-            "next": null,
-          },
+          "next": null,
         },
       },
     },
@@ -141,12 +154,7 @@ Object {
               1,
             ],
           },
-          "next": Object {
-            "charCode": 97,
-            "firstChild": null,
-            "firstDoc": null,
-            "next": null,
-          },
+          "next": null,
         },
       },
     },
@@ -230,12 +238,7 @@ Object {
               0,
             ],
           },
-          "next": Object {
-            "charCode": 97,
-            "firstChild": null,
-            "firstDoc": null,
-            "next": null,
-          },
+          "next": null,
         },
       },
     },
