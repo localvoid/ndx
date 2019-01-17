@@ -203,3 +203,170 @@ export function addInvertedIndexPosting<I>(node: InvertedIndexNode<I>, posting: 
   }
   node.firstPosting = posting;
 }
+
+/**
+ * Adds a document to the index.
+ *
+ * @typeparam I Document ID type.
+ * @param index {@link Index}.
+ * @param fieldAccessors Field accessors.
+ * @param tokenizer Tokenizer is a function that breaks a text into words, phrases, symbols, or other meaningful
+ *  elements called tokens.
+ * @param filter Filter is a function that processes tokens and returns terms, terms are used in Inverted Index to index
+ *  documents.
+ * @param id Document ID.
+ * @param document Document.
+ */
+export function addDocumentToIndex<I, D>(
+  index: Index<I>,
+  fieldAccessors: Array<(doc: D) => string>,
+  tokenizer: (s: string) => string[],
+  filter: (s: string) => string,
+  id: I,
+  document: D,
+): void {
+  const { documents, root, fields } = index;
+  const fieldLengths = [];
+  const termCounts = new Map<string, number[]>();
+
+  for (let i = 0; i < fields.length; i++) {
+    const fieldValue = fieldAccessors[i](document);
+    if (fieldValue === void 0) {
+      fieldLengths.push(0);
+    } else {
+      const fieldDetails = fields[i];
+      // tokenize text
+      const terms = tokenizer(fieldValue);
+
+      // filter and count terms, ignore empty strings
+      let filteredTermsCount = 0;
+      for (let j = 0; j < terms.length; j++) {
+        const term = filter(terms[j]);
+        if (term !== "") {
+          filteredTermsCount++;
+          let counts = termCounts.get(term);
+          if (counts === void 0) {
+            counts = new Array<number>(fields.length).fill(0);
+            termCounts.set(term, counts);
+          }
+          counts[i] += 1;
+        }
+      }
+
+      fieldDetails.sum += filteredTermsCount;
+      fieldDetails.avg = fieldDetails.sum / (documents.size + 1);
+      fieldLengths[i] = filteredTermsCount;
+    }
+  }
+
+  const details: DocumentDetails<I> = { id, fieldLengths };
+  documents.set(id, details);
+  termCounts.forEach((termFrequency, term) => {
+    let node = root;
+
+    for (let i = 0; i < term.length; i++) {
+      if (node.firstChild === null) {
+        node = createInvertedIndexNodes(node, term, i);
+        break;
+      }
+      const nextNode = findInvertedIndexChildNodeByCharCode(node, term.charCodeAt(i));
+      if (nextNode === void 0) {
+        node = createInvertedIndexNodes(node, term, i);
+        break;
+      }
+      node = nextNode;
+    }
+
+    addInvertedIndexPosting(node, { next: null, details, termFrequency });
+  });
+}
+
+/**
+ * Creates inverted index nodes for the `term` starting from the `start` character.
+ *
+ * @typeparam I Document ID type.
+ * @param parent Parent node.
+ * @param term Term.
+ * @param start First char code position in the `term`.
+ * @returns Leaf {@link InvertedIndexNode}.
+ */
+function createInvertedIndexNodes<I>(
+  parent: InvertedIndexNode<I>,
+  term: string,
+  start: number,
+): InvertedIndexNode<I> {
+  for (; start < term.length; start++) {
+    const newNode = createInvertedIndexNode<I>(term.charCodeAt(start));
+    addInvertedIndexChildNode(parent, newNode);
+    parent = newNode;
+  }
+  return parent;
+}
+
+/**
+ * Remove document from the index.
+ *
+ * @typeparam I Document ID type.
+ * @param index {@link Index}.
+ * @param removed Set of removed document ids.
+ * @param id Document ID.
+ */
+export function removeDocumentFromIndex<I>(index: Index<I>, removed: Set<I>, id: I): void {
+  const { documents, fields } = index;
+  const docDetails = documents.get(id);
+  if (docDetails !== void 0) {
+    removed.add(id);
+    documents.delete(id);
+    for (let i = 0; i < fields.length; i++) {
+      const fieldLength = docDetails.fieldLengths[i];
+      if (fieldLength > 0) {
+        const field = fields[i];
+        field.sum -= fieldLength;
+        field.avg = field.sum / documents.size;
+      }
+    }
+  }
+}
+
+/**
+ * Cleans up removed documents from the {@link Index}.
+ *
+ * @typeparam I Document ID type.
+ * @param index {@link Index}.
+ * @param removed Set of removed document ids.
+ */
+export function vacuumIndex<I>(index: Index<I>, removed: Set<I>): void {
+  _vacuumIndex(index.root, removed);
+  removed.clear();
+}
+
+/**
+ * Recursively cleans up removed postings from the index.
+ *
+ * @typeparam I Document ID type.
+ * @param node {@link InvertedIndexNode}
+ * @param removed Set of removed document ids.
+ */
+function _vacuumIndex<I>(node: InvertedIndexNode<I>, removed: Set<I>): void {
+  let prevPointer: DocumentPointer<I> | null = null;
+  let pointer = node.firstPosting;
+  while (pointer !== null) {
+    const id = pointer.details.id;
+    if (removed.has(id)) {
+      if (prevPointer === null) {
+        node.firstPosting = pointer.next;
+      } else {
+        prevPointer.next = pointer.next;
+      }
+    } else {
+      prevPointer = pointer;
+    }
+    pointer = pointer.next;
+  }
+
+  let child = node.firstChild;
+  while (child !== null) {
+    _vacuumIndex(child, removed);
+    child = child.next;
+  }
+}
