@@ -1,6 +1,6 @@
 {
   "name": "ndx",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "main": "dist/main/index.js",
   "module": "dist/module/index.js",
   "es2015": "dist/es2015/index.js",
@@ -38,9 +38,8 @@
     "jest": "^23.6.0",
     "ndx-dev-commons": "^1.0.0-beta.0",
     "ts-jest": "^23.10.5",
-    "ts-node": "^7.0.1",
     "tslib": "^1.9.3",
-    "tslint": "^5.12.0",
+    "tslint": "^5.12.1",
     "typescript": "^3.2.2"
   },
   "license": "MIT",
@@ -56,13 +55,13 @@
     "search",
     "relevance"
   ],
-  "homepage": "https://github.com/localvoid/ndx",
+  "homepage": "https://github.com/ndx-search/ndx",
   "repository": {
     "type": "git",
-    "url": "https://github.com/localvoid/ndx"
+    "url": "https://github.com/ndx-search/ndx"
   },
   "bugs": {
-    "url": "https://github.com/localvoid/ndx/issues"
+    "url": "https://github.com/ndx-search/ndx/issues"
   },
-  "github": "https://github.com/localvoid/ndx"
+  "github": "https://github.com/ndx-search/ndx"
 }
