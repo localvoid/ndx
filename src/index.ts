@@ -98,12 +98,8 @@ export interface InvertedIndexNode<T> {
   firstChild: InvertedIndexNode<T> | null;
   /**
    * Linked list of documents associated with this node.
-   *
-   * Term `posting` is used in a traditional literature about information retrieval, see
-   * [Introduction to Information Retrieval](https://nlp.stanford.edu/IR-book/information-retrieval-book.html) for
-   * more details.
    */
-  firstPosting: DocumentPointer<T> | null;
+  firstDoc: DocumentPointer<T> | null;
 }
 
 /**
@@ -132,7 +128,7 @@ export function createInvertedIndexNode<T>(charCode: number): InvertedIndexNode<
     charCode,
     next: null,
     firstChild: null,
-    firstPosting: null,
+    firstDoc: null,
   };
 }
 
@@ -191,17 +187,17 @@ export function addInvertedIndexChildNode<T>(parent: InvertedIndexNode<T>, child
 }
 
 /**
- * Adds posting to inverted index node.
+ * Adds document to inverted index node.
  *
  * @typeparam T Document key.
  * @param node Inverted index node.
- * @param posting Posting.
+ * @param doc Posting.
  */
-export function addInvertedIndexPosting<T>(node: InvertedIndexNode<T>, posting: DocumentPointer<T>): void {
-  if (node.firstPosting !== null) {
-    posting.next = node.firstPosting;
+export function addInvertedIndexDoc<T>(node: InvertedIndexNode<T>, doc: DocumentPointer<T>): void {
+  if (node.firstDoc !== null) {
+    doc.next = node.firstDoc;
   }
-  node.firstPosting = posting;
+  node.firstDoc = doc;
 }
 
 /**
@@ -278,7 +274,7 @@ export function addDocumentToIndex<T, D>(
       node = nextNode;
     }
 
-    addInvertedIndexPosting(node, { next: null, details, termFrequency });
+    addInvertedIndexDoc(node, { next: null, details, termFrequency });
   });
 }
 
@@ -342,7 +338,7 @@ export function vacuumIndex<T>(index: Index<T>, removed: Set<T>): void {
 }
 
 /**
- * Recursively cleans up removed postings from the index.
+ * Recursively cleans up removed documents from the index.
  *
  * @typeparam T Document key.
  * @param node {@link InvertedIndexNode}
@@ -350,12 +346,12 @@ export function vacuumIndex<T>(index: Index<T>, removed: Set<T>): void {
  */
 function _vacuumIndex<T>(node: InvertedIndexNode<T>, removed: Set<T>): void {
   let prevPointer: DocumentPointer<T> | null = null;
-  let pointer = node.firstPosting;
+  let pointer = node.firstDoc;
   while (pointer !== null) {
     const id = pointer.details.key;
     if (removed.has(id)) {
       if (prevPointer === null) {
-        node.firstPosting = pointer.next;
+        node.firstDoc = pointer.next;
       } else {
         prevPointer.next = pointer.next;
       }

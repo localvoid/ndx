@@ -1,6 +1,6 @@
 import {
   createInvertedIndexNode, addInvertedIndexChildNode, findInvertedIndexChildNodeByCharCode, findInvertedIndexNode,
-  addInvertedIndexPosting,
+  addInvertedIndexDoc,
 } from "..";
 
 const create = (charCode: number) => createInvertedIndexNode<number>(charCode);
@@ -21,9 +21,9 @@ describe("createInvertedIndexNode", () => {
     expect(n.firstChild).toBeNull();
   });
 
-  test("inverted index node should be created with null firstPosting", () => {
+  test("inverted index node should be created with null firstDoc", () => {
     const n = create(1);
-    expect(n.firstPosting).toBeNull();
+    expect(n.firstDoc).toBeNull();
   });
 });
 
@@ -77,13 +77,13 @@ describe("addInvertedIndexPosting", () => {
     const p = {
       next: null,
       details: {
-        id: 0,
+        key: 0,
         fieldLengths: [],
       },
       termFrequency: [],
     };
-    addInvertedIndexPosting(n, p);
-    expect(n.firstPosting).toBe(p);
+    addInvertedIndexDoc(n, p);
+    expect(n.firstDoc).toBe(p);
   });
 
   test("should add two nodes", () => {
@@ -91,7 +91,7 @@ describe("addInvertedIndexPosting", () => {
     const p1 = {
       next: null,
       details: {
-        id: 0,
+        key: 0,
         fieldLengths: [],
       },
       termFrequency: [],
@@ -99,14 +99,14 @@ describe("addInvertedIndexPosting", () => {
     const p2 = {
       next: null,
       details: {
-        id: 0,
+        key: 0,
         fieldLengths: [],
       },
       termFrequency: [],
     };
-    addInvertedIndexPosting(n, p1);
-    addInvertedIndexPosting(n, p2);
-    expect(n.firstPosting).toBe(p2);
+    addInvertedIndexDoc(n, p1);
+    addInvertedIndexDoc(n, p2);
+    expect(n.firstDoc).toBe(p2);
     expect(p2.next).toBe(p1);
     expect(p1.next).toBe(null);
   });

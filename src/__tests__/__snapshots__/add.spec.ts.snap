@@ -19,7 +19,7 @@ Object {
   "root": Object {
     "charCode": 0,
     "firstChild": null,
-    "firstPosting": null,
+    "firstDoc": null,
     "next": null,
   },
 }
@@ -51,7 +51,7 @@ Object {
     "firstChild": Object {
       "charCode": 101,
       "firstChild": null,
-      "firstPosting": Object {
+      "firstDoc": Object {
         "details": Object {
           "fieldLengths": Array [
             3,
@@ -68,7 +68,7 @@ Object {
       "next": Object {
         "charCode": 100,
         "firstChild": null,
-        "firstPosting": Object {
+        "firstDoc": Object {
           "details": Object {
             "fieldLengths": Array [
               3,
@@ -85,7 +85,7 @@ Object {
         "next": Object {
           "charCode": 99,
           "firstChild": null,
-          "firstPosting": Object {
+          "firstDoc": Object {
             "details": Object {
               "fieldLengths": Array [
                 3,
@@ -102,7 +102,7 @@ Object {
           "next": Object {
             "charCode": 98,
             "firstChild": null,
-            "firstPosting": Object {
+            "firstDoc": Object {
               "details": Object {
                 "fieldLengths": Array [
                   3,
@@ -119,7 +119,7 @@ Object {
             "next": Object {
               "charCode": 97,
               "firstChild": null,
-              "firstPosting": Object {
+              "firstDoc": Object {
                 "details": Object {
                   "fieldLengths": Array [
                     3,
@@ -139,7 +139,7 @@ Object {
         },
       },
     },
-    "firstPosting": null,
+    "firstDoc": null,
     "next": null,
   },
 }
@@ -177,7 +177,7 @@ Object {
     "firstChild": Object {
       "charCode": 99,
       "firstChild": null,
-      "firstPosting": Object {
+      "firstDoc": Object {
         "details": Object {
           "fieldLengths": Array [
             3,
@@ -197,7 +197,7 @@ Object {
       "next": Object {
         "charCode": 98,
         "firstChild": null,
-        "firstPosting": Object {
+        "firstDoc": Object {
           "details": Object {
             "fieldLengths": Array [
               3,
@@ -217,7 +217,7 @@ Object {
         "next": Object {
           "charCode": 97,
           "firstChild": null,
-          "firstPosting": Object {
+          "firstDoc": Object {
             "details": Object {
               "fieldLengths": Array [
                 3,
@@ -238,7 +238,7 @@ Object {
         },
       },
     },
-    "firstPosting": null,
+    "firstDoc": null,
     "next": null,
   },
 }
@@ -270,7 +270,7 @@ Object {
     "firstChild": Object {
       "charCode": 99,
       "firstChild": null,
-      "firstPosting": Object {
+      "firstDoc": Object {
         "details": Object {
           "fieldLengths": Array [
             3,
@@ -287,7 +287,7 @@ Object {
       "next": Object {
         "charCode": 98,
         "firstChild": null,
-        "firstPosting": Object {
+        "firstDoc": Object {
           "details": Object {
             "fieldLengths": Array [
               3,
@@ -304,7 +304,7 @@ Object {
         "next": Object {
           "charCode": 97,
           "firstChild": null,
-          "firstPosting": Object {
+          "firstDoc": Object {
             "details": Object {
               "fieldLengths": Array [
                 3,
@@ -322,7 +322,7 @@ Object {
         },
       },
     },
-    "firstPosting": null,
+    "firstDoc": null,
     "next": null,
   },
 }
@@ -349,7 +349,7 @@ Object {
     "firstChild": Object {
       "charCode": 99,
       "firstChild": null,
-      "firstPosting": Object {
+      "firstDoc": Object {
         "details": Object {
           "fieldLengths": Array [
             3,
@@ -364,7 +364,7 @@ Object {
       "next": Object {
         "charCode": 98,
         "firstChild": null,
-        "firstPosting": Object {
+        "firstDoc": Object {
           "details": Object {
             "fieldLengths": Array [
               3,
@@ -379,7 +379,7 @@ Object {
         "next": Object {
           "charCode": 97,
           "firstChild": null,
-          "firstPosting": Object {
+          "firstDoc": Object {
             "details": Object {
               "fieldLengths": Array [
                 3,
@@ -395,7 +395,7 @@ Object {
         },
       },
     },
-    "firstPosting": null,
+    "firstDoc": null,
     "next": null,
   },
 }
@@ -428,7 +428,7 @@ Object {
     "firstChild": Object {
       "charCode": 102,
       "firstChild": null,
-      "firstPosting": Object {
+      "firstDoc": Object {
         "details": Object {
           "fieldLengths": Array [
             3,
@@ -443,7 +443,7 @@ Object {
       "next": Object {
         "charCode": 101,
         "firstChild": null,
-        "firstPosting": Object {
+        "firstDoc": Object {
           "details": Object {
             "fieldLengths": Array [
               3,
@@ -458,7 +458,7 @@ Object {
         "next": Object {
           "charCode": 100,
           "firstChild": null,
-          "firstPosting": Object {
+          "firstDoc": Object {
             "details": Object {
               "fieldLengths": Array [
                 3,
@@ -473,7 +473,7 @@ Object {
           "next": Object {
             "charCode": 99,
             "firstChild": null,
-            "firstPosting": Object {
+            "firstDoc": Object {
               "details": Object {
                 "fieldLengths": Array [
                   3,
@@ -488,7 +488,7 @@ Object {
             "next": Object {
               "charCode": 98,
               "firstChild": null,
-              "firstPosting": Object {
+              "firstDoc": Object {
                 "details": Object {
                   "fieldLengths": Array [
                     3,
@@ -503,7 +503,7 @@ Object {
               "next": Object {
                 "charCode": 97,
                 "firstChild": null,
-                "firstPosting": Object {
+                "firstDoc": Object {
                   "details": Object {
                     "fieldLengths": Array [
                       3,
@@ -522,7 +522,7 @@ Object {
         },
       },
     },
-    "firstPosting": null,
+    "firstDoc": null,
     "next": null,
   },
 }
@@ -555,7 +555,7 @@ Object {
     "firstChild": Object {
       "charCode": 100,
       "firstChild": null,
-      "firstPosting": Object {
+      "firstDoc": Object {
         "details": Object {
           "fieldLengths": Array [
             3,
@@ -570,7 +570,7 @@ Object {
       "next": Object {
         "charCode": 99,
         "firstChild": null,
-        "firstPosting": Object {
+        "firstDoc": Object {
           "details": Object {
             "fieldLengths": Array [
               3,
@@ -596,7 +596,7 @@ Object {
         "next": Object {
           "charCode": 98,
           "firstChild": null,
-          "firstPosting": Object {
+          "firstDoc": Object {
             "details": Object {
               "fieldLengths": Array [
                 3,
@@ -622,7 +622,7 @@ Object {
           "next": Object {
             "charCode": 97,
             "firstChild": null,
-            "firstPosting": Object {
+            "firstDoc": Object {
               "details": Object {
                 "fieldLengths": Array [
                   3,
@@ -639,7 +639,7 @@ Object {
         },
       },
     },
-    "firstPosting": null,
+    "firstDoc": null,
     "next": null,
   },
 }
