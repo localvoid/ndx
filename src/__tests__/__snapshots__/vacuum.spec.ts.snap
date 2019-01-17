@@ -2,12 +2,12 @@
 
 exports[`remove the same document twice 1`] = `
 Object {
-  "documents": Map {
+  "docs": Map {
     2 => Object {
       "fieldLengths": Array [
         3,
       ],
-      "id": 2,
+      "key": 2,
     },
   },
   "fields": Array [
@@ -26,7 +26,7 @@ Object {
           "fieldLengths": Array [
             3,
           ],
-          "id": 2,
+          "key": 2,
         },
         "next": null,
         "termFrequency": Array [
@@ -41,7 +41,7 @@ Object {
             "fieldLengths": Array [
               3,
             ],
-            "id": 2,
+            "key": 2,
           },
           "next": null,
           "termFrequency": Array [
@@ -56,7 +56,7 @@ Object {
               "fieldLengths": Array [
                 3,
               ],
-              "id": 2,
+              "key": 2,
             },
             "next": null,
             "termFrequency": Array [
@@ -80,12 +80,12 @@ Object {
 
 exports[`two documents with shared terms 1`] = `
 Object {
-  "documents": Map {
+  "docs": Map {
     2 => Object {
       "fieldLengths": Array [
         3,
       ],
-      "id": 2,
+      "key": 2,
     },
   },
   "fields": Array [
@@ -104,7 +104,7 @@ Object {
           "fieldLengths": Array [
             3,
           ],
-          "id": 2,
+          "key": 2,
         },
         "next": null,
         "termFrequency": Array [
@@ -119,7 +119,7 @@ Object {
             "fieldLengths": Array [
               3,
             ],
-            "id": 2,
+            "key": 2,
           },
           "next": null,
           "termFrequency": Array [
@@ -134,7 +134,7 @@ Object {
               "fieldLengths": Array [
                 3,
               ],
-              "id": 2,
+              "key": 2,
             },
             "next": null,
             "termFrequency": Array [
@@ -158,13 +158,13 @@ Object {
 
 exports[`two documents with undefined fields 1`] = `
 Object {
-  "documents": Map {
+  "docs": Map {
     2 => Object {
       "fieldLengths": Array [
         3,
         0,
       ],
-      "id": 2,
+      "key": 2,
     },
   },
   "fields": Array [
@@ -188,7 +188,7 @@ Object {
             3,
             0,
           ],
-          "id": 2,
+          "key": 2,
         },
         "next": null,
         "termFrequency": Array [
@@ -205,7 +205,7 @@ Object {
               3,
               0,
             ],
-            "id": 2,
+            "key": 2,
           },
           "next": null,
           "termFrequency": Array [
@@ -222,7 +222,7 @@ Object {
                 3,
                 0,
               ],
-              "id": 2,
+              "key": 2,
             },
             "next": null,
             "termFrequency": Array [

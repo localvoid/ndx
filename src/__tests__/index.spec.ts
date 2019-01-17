@@ -3,8 +3,8 @@ import { createIndex } from "../index";
 describe("createIndex", () => {
   test("documents should be an empty Map", () => {
     const n = createIndex(0);
-    expect(n.documents).toBeInstanceOf(Map);
-    expect(n.documents.size).toBe(0);
+    expect(n.docs).toBeInstanceOf(Map);
+    expect(n.docs.size).toBe(0);
   });
 
   test("inverted index root should be a node with charCode 0", () => {

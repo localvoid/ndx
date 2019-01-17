@@ -2,12 +2,12 @@
 
 exports[`document with empty text 1`] = `
 Object {
-  "documents": Map {
+  "docs": Map {
     1 => Object {
       "fieldLengths": Array [
         0,
       ],
-      "id": 1,
+      "key": 1,
     },
   },
   "fields": Array [
@@ -27,13 +27,13 @@ Object {
 
 exports[`document with multiple fields 1`] = `
 Object {
-  "documents": Map {
+  "docs": Map {
     1 => Object {
       "fieldLengths": Array [
         3,
         3,
       ],
-      "id": 1,
+      "key": 1,
     },
   },
   "fields": Array [
@@ -57,7 +57,7 @@ Object {
             3,
             3,
           ],
-          "id": 1,
+          "key": 1,
         },
         "next": null,
         "termFrequency": Array [
@@ -74,7 +74,7 @@ Object {
               3,
               3,
             ],
-            "id": 1,
+            "key": 1,
           },
           "next": null,
           "termFrequency": Array [
@@ -91,7 +91,7 @@ Object {
                 3,
                 3,
               ],
-              "id": 1,
+              "key": 1,
             },
             "next": null,
             "termFrequency": Array [
@@ -108,7 +108,7 @@ Object {
                   3,
                   3,
                 ],
-                "id": 1,
+                "key": 1,
               },
               "next": null,
               "termFrequency": Array [
@@ -125,7 +125,7 @@ Object {
                     3,
                     3,
                   ],
-                  "id": 1,
+                  "key": 1,
                 },
                 "next": null,
                 "termFrequency": Array [
@@ -145,15 +145,21 @@ Object {
 }
 `;
 
-exports[`document with unavailable field 1`] = `
+exports[`document with object key 1`] = `
 Object {
-  "documents": Map {
-    1 => Object {
+  "docs": Map {
+    Object {
+      "id": 1,
+      "text1": "a b c",
+    } => Object {
       "fieldLengths": Array [
         3,
         0,
       ],
-      "id": 1,
+      "key": Object {
+        "id": 1,
+        "text1": "a b c",
+      },
     },
   },
   "fields": Array [
@@ -177,7 +183,10 @@ Object {
             3,
             0,
           ],
-          "id": 1,
+          "key": Object {
+            "id": 1,
+            "text1": "a b c",
+          },
         },
         "next": null,
         "termFrequency": Array [
@@ -194,7 +203,10 @@ Object {
               3,
               0,
             ],
-            "id": 1,
+            "key": Object {
+              "id": 1,
+              "text1": "a b c",
+            },
           },
           "next": null,
           "termFrequency": Array [
@@ -211,7 +223,10 @@ Object {
                 3,
                 0,
               ],
-              "id": 1,
+              "key": Object {
+                "id": 1,
+                "text1": "a b c",
+              },
             },
             "next": null,
             "termFrequency": Array [
@@ -229,14 +244,98 @@ Object {
 }
 `;
 
-exports[`one document with tree terms 1`] = `
+exports[`document with unavailable field 1`] = `
 Object {
-  "documents": Map {
+  "docs": Map {
+    1 => Object {
+      "fieldLengths": Array [
+        3,
+        0,
+      ],
+      "key": 1,
+    },
+  },
+  "fields": Array [
+    Object {
+      "avg": 3,
+      "sum": 3,
+    },
+    Object {
+      "avg": 0,
+      "sum": 0,
+    },
+  ],
+  "root": Object {
+    "charCode": 0,
+    "firstChild": Object {
+      "charCode": 99,
+      "firstChild": null,
+      "firstPosting": Object {
+        "details": Object {
+          "fieldLengths": Array [
+            3,
+            0,
+          ],
+          "key": 1,
+        },
+        "next": null,
+        "termFrequency": Array [
+          1,
+          0,
+        ],
+      },
+      "next": Object {
+        "charCode": 98,
+        "firstChild": null,
+        "firstPosting": Object {
+          "details": Object {
+            "fieldLengths": Array [
+              3,
+              0,
+            ],
+            "key": 1,
+          },
+          "next": null,
+          "termFrequency": Array [
+            1,
+            0,
+          ],
+        },
+        "next": Object {
+          "charCode": 97,
+          "firstChild": null,
+          "firstPosting": Object {
+            "details": Object {
+              "fieldLengths": Array [
+                3,
+                0,
+              ],
+              "key": 1,
+            },
+            "next": null,
+            "termFrequency": Array [
+              1,
+              0,
+            ],
+          },
+          "next": null,
+        },
+      },
+    },
+    "firstPosting": null,
+    "next": null,
+  },
+}
+`;
+
+exports[`one document with three terms 1`] = `
+Object {
+  "docs": Map {
     1 => Object {
       "fieldLengths": Array [
         3,
       ],
-      "id": 1,
+      "key": 1,
     },
   },
   "fields": Array [
@@ -255,7 +354,7 @@ Object {
           "fieldLengths": Array [
             3,
           ],
-          "id": 1,
+          "key": 1,
         },
         "next": null,
         "termFrequency": Array [
@@ -270,7 +369,7 @@ Object {
             "fieldLengths": Array [
               3,
             ],
-            "id": 1,
+            "key": 1,
           },
           "next": null,
           "termFrequency": Array [
@@ -285,7 +384,7 @@ Object {
               "fieldLengths": Array [
                 3,
               ],
-              "id": 1,
+              "key": 1,
             },
             "next": null,
             "termFrequency": Array [
@@ -304,18 +403,18 @@ Object {
 
 exports[`two documents with different terms 1`] = `
 Object {
-  "documents": Map {
+  "docs": Map {
     1 => Object {
       "fieldLengths": Array [
         3,
       ],
-      "id": 1,
+      "key": 1,
     },
     2 => Object {
       "fieldLengths": Array [
         3,
       ],
-      "id": 2,
+      "key": 2,
     },
   },
   "fields": Array [
@@ -334,7 +433,7 @@ Object {
           "fieldLengths": Array [
             3,
           ],
-          "id": 2,
+          "key": 2,
         },
         "next": null,
         "termFrequency": Array [
@@ -349,7 +448,7 @@ Object {
             "fieldLengths": Array [
               3,
             ],
-            "id": 2,
+            "key": 2,
           },
           "next": null,
           "termFrequency": Array [
@@ -364,7 +463,7 @@ Object {
               "fieldLengths": Array [
                 3,
               ],
-              "id": 2,
+              "key": 2,
             },
             "next": null,
             "termFrequency": Array [
@@ -379,7 +478,7 @@ Object {
                 "fieldLengths": Array [
                   3,
                 ],
-                "id": 1,
+                "key": 1,
               },
               "next": null,
               "termFrequency": Array [
@@ -394,7 +493,7 @@ Object {
                   "fieldLengths": Array [
                     3,
                   ],
-                  "id": 1,
+                  "key": 1,
                 },
                 "next": null,
                 "termFrequency": Array [
@@ -409,7 +508,7 @@ Object {
                     "fieldLengths": Array [
                       3,
                     ],
-                    "id": 1,
+                    "key": 1,
                   },
                   "next": null,
                   "termFrequency": Array [
@@ -431,18 +530,18 @@ Object {
 
 exports[`two documents with shared terms 1`] = `
 Object {
-  "documents": Map {
+  "docs": Map {
     1 => Object {
       "fieldLengths": Array [
         3,
       ],
-      "id": 1,
+      "key": 1,
     },
     2 => Object {
       "fieldLengths": Array [
         3,
       ],
-      "id": 2,
+      "key": 2,
     },
   },
   "fields": Array [
@@ -461,7 +560,7 @@ Object {
           "fieldLengths": Array [
             3,
           ],
-          "id": 2,
+          "key": 2,
         },
         "next": null,
         "termFrequency": Array [
@@ -476,14 +575,14 @@ Object {
             "fieldLengths": Array [
               3,
             ],
-            "id": 2,
+            "key": 2,
           },
           "next": Object {
             "details": Object {
               "fieldLengths": Array [
                 3,
               ],
-              "id": 1,
+              "key": 1,
             },
             "next": null,
             "termFrequency": Array [
@@ -502,14 +601,14 @@ Object {
               "fieldLengths": Array [
                 3,
               ],
-              "id": 2,
+              "key": 2,
             },
             "next": Object {
               "details": Object {
                 "fieldLengths": Array [
                   3,
                 ],
-                "id": 1,
+                "key": 1,
               },
               "next": null,
               "termFrequency": Array [
@@ -528,7 +627,7 @@ Object {
                 "fieldLengths": Array [
                   3,
                 ],
-                "id": 1,
+                "key": 1,
               },
               "next": null,
               "termFrequency": Array [
