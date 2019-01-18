@@ -1,6 +1,7 @@
 {
   "name": "ndx",
-  "version": "1.0.0-beta.2",
+  "version": "1.0.0-beta.3",
+  "sideEffects": false,
   "main": "dist/main/index.js",
   "module": "dist/module/index.js",
   "es2015": "dist/es2015/index.js",
