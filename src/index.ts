@@ -306,14 +306,14 @@ function createInvertedIndexNodes<T>(
  * @typeparam T Document key.
  * @param index {@link Index}.
  * @param removed Set of removed document ids.
- * @param doc Document key.
+ * @param key Document key.
  */
-export function removeDocumentFromIndex<T>(index: Index<T>, removed: Set<T>, doc: T): void {
+export function removeDocumentFromIndex<T>(index: Index<T>, removed: Set<T>, key: T): void {
   const { docs: documents, fields } = index;
-  const docDetails = documents.get(doc);
+  const docDetails = documents.get(key);
   if (docDetails !== void 0) {
-    removed.add(doc);
-    documents.delete(doc);
+    removed.add(key);
+    documents.delete(key);
     for (let i = 0; i < fields.length; i++) {
       const fieldLength = docDetails.fieldLengths[i];
       if (fieldLength > 0) {
