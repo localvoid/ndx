@@ -21,7 +21,7 @@ and search engine is working in a WebWorker.
 - Configurable tokenizer and term filter.
 - Free text queries with query expansion.
 - Small memory footprint, optimized for mobile devices.
-- Serializable/deserializable index.
+- Serializable index.
 
 ## Documentation
 
