@@ -1,6 +1,6 @@
 {
   "name": "ndx",
-  "version": "1.0.0-beta.3",
+  "version": "1.0.0",
   "sideEffects": false,
   "main": "dist/main/index.js",
   "module": "dist/module/index.js",
@@ -32,16 +32,16 @@
     "LICENSE"
   ],
   "devDependencies": {
-    "@types/jest": "^23.3.12",
-    "@types/node": "^10.12.18",
+    "@types/jest": "^23.3.13",
+    "@types/node": "^10.12.21",
     "codecov": "^3.1.0",
     "husky": "^1.3.1",
     "jest": "^23.6.0",
-    "ndx-dev-commons": "^1.0.0-beta.0",
+    "ndx-dev-commons": "^1.0.0",
     "ts-jest": "^23.10.5",
     "tslib": "^1.9.3",
     "tslint": "^5.12.1",
-    "typescript": "^3.2.2"
+    "typescript": "^3.3.1"
   },
   "license": "MIT",
   "author": {
