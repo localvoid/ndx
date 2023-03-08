@@ -1,16 +1,23 @@
-# Editor configuration, see http://editorconfig.org
-
 root = true
 
 [*]
-indent_style = space
-indent_size = 2
-end_of_line = lf
 charset = utf-8
+end_of_line = lf
 trim_trailing_whitespace = true
 insert_final_newline = true
-max_line_length = 120
 
-[*.md]
-max_line_length = off
-trim_trailing_whitespace = false
+[*.{mts,ts,js,mjs}]
+indent_style = space
+indent_size = 2
+
+[*.{css}]
+indent_style = space
+indent_size = 2
+
+[*.{json,yml,yaml}]
+indent_style = space
+indent_size = 2
+
+[*.{md}]
+indent_style = space
+indent_size = 2

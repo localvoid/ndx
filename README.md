@@ -1,31 +1,125 @@
-# [ndx](https://github.com/ndx-search/ndx) &middot; [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/ndx-search/ndx/blob/master/LICENSE) [![npm version](https://img.shields.io/npm/v/ndx.svg)](https://www.npmjs.com/package/ndx) [![codecov](https://codecov.io/gh/ndx-search/ndx/branch/master/graph/badge.svg)](https://codecov.io/gh/ndx-search/ndx) [![CircleCI Status](https://circleci.com/gh/ndx-search/ndx.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/ndx-search/ndx) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/ndx-search/ndx)
+# [ndx](https://github.com/ndx-search/ndx) &middot; [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/ndx-search/ndx/blob/master/LICENSE)
 
-ndx is a collection of javascript (TypeScript) libraries for lightweight full-text indexing and searching.
-
-## Live Demo
-
-[Reddit Comments Search Engine](https://localvoid.github.io/ndx-demo/) - is a simple demo application that indexes
-10,000 reddit comments. Demo application requires modern browser features:
-[WebWorkers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API) and
-[IndexedDB](https://developer.mozilla.org/en/docs/Web/API/IndexedDB_API). Comments are stored in the IndexedDB,
-and search engine is working in a WebWorker.
+Lightweight Full-Text Indexing and Searching Library.
 
 ## Features
 
 - Multiple fields full-text indexing and searching.
 - Per-field score boosting.
-- [BM25](https://en.wikipedia.org/wiki/Okapi_BM25) ranking function to rank matching documents. The same ranking
-  function that is used by default in [Lucene](http://lucene.apache.org/core/) >= 6.0.0.
+- [BM25](https://en.wikipedia.org/wiki/Okapi_BM25) ranking function to rank
+matching documents.
 - [Trie](https://en.wikipedia.org/wiki/Trie) based dynamic
-  [Inverted Index](https://en.wikipedia.org/wiki/Inverted_index).
+[Inverted Index](https://en.wikipedia.org/wiki/Inverted_index).
 - Configurable tokenizer and term filter.
 - Free text queries with query expansion.
-- Small memory footprint, optimized for mobile devices.
-- Serializable index.
+- Small memory footprint.
 
-## Documentation
+## Example
 
-To check out docs, visit [https://github.com/ndx-search/docs](https://github.com/ndx-search/docs).
+```js
+import { createIndex, indexAdd } from "ndx";
+import { indexQuery } from "ndx/query";
+
+const termFilter = (term) => term.toLowerCase();
+
+function createDocumentIndex(fields) {
+  // `createIndex()` creates an index data structure.
+  // First argument specifies how many different fields we want to index.
+  const index = createIndex(
+    fields.length,
+    // Tokenizer is a function that breaks text into words, phrases, symbols,
+    // or other meaningful elements called tokens.
+    (s) => s.split(" "),
+    // Filter is a function that processes tokens and returns terms, terms are
+    // used in Inverted Index to index documents.
+    termFilter,
+  );
+  // `fieldGetters` is an array with functions that will be used to retrieve
+  // data from different fields.
+  const fieldGetters = fields.map((f) => (doc) => doc[f.name]);
+  // `fieldBoostFactors` is an array of boost factors for each field, in this
+  // example all fields will have identical weight.
+  const fieldBoostFactors = fields.map(() => 1);
+
+  return {
+    index,
+    // `add()` will add documents to the index.
+    add(doc) {
+      indexAdd(
+        index,
+        fieldGetters,
+        // Docum  ent key, it can be an unique document id or a refernce to a
+        // document if you want to store all documents in memory.
+        doc.id,
+        // Document.
+        doc,
+      );
+    },
+    // `remove()` will remove documents from the index.
+    remove(id) {
+      // When document is removed we are just marking document id as being
+      // removed. Index data structure still contains references to the removed
+      // document.
+      indexRemove(index, removed, id);
+      if (removed.size > 10) {
+        // `indexVacuum()` removes all references to removed documents from the
+        // index.
+        indexVacuum(index, removed);
+      }
+    },
+
+    // `search()` will be used to perform queries.
+    search(q) {
+      return indexQuery(
+        index,
+        fieldBoostFactors,
+        // BM25 ranking function constants:
+        // BM25 k1 constant, controls non-linear term frequency normalization
+        // (saturation).
+        1.2,
+        // BM25 b constant, controls to what degree document length normalizes
+        // tf values.
+        0.75,
+        q,
+      );
+    }
+  };
+}
+
+// Create a document index that will index `content` field.
+const index = createDocumentIndex([{ name: "content" }]);
+
+const docs = [
+  {
+    "id": "1",
+    "content": "Lorem ipsum dolor",
+  },
+  {
+    "id": "2",
+    "content": "Lorem ipsum",
+  }
+];
+
+// Add documents to the index.
+docs.forEach((d) => { index.add(d); });
+
+// Perform a search query.
+index.search("Lorem");
+// => [{ key: "2" , score: ... }, { key: "1", score: ... } ]
+//
+// document with an id `"2"` is ranked higher because it has a `"content"`
+// field with a less number of terms than document with an id `"1"`.
+
+index.search("dolor");
+// => [{ key: "1", score: ... }]
+```
+
+### Tokenizers and Filters
+
+`ndx` library doesn't provide any tokenizers or filters. There are other
+libraries that implement tokenizers, for example
+[Natural](https://github.com/NaturalNode/natural/) has a good collection of
+tokenizers and stemmers.
 
 ## License
 

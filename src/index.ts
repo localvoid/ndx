@@ -1,43 +1,46 @@
 /**
  * Index data structure.
  *
- * This data structure is optimized for memory consumption and performant mutations during indexing, so it contains only
- * basic information.
- *
  * @typeparam T Document key.
  */
-export interface Index<T> {
-  /**
-   * Additional information about documents.
-   */
+export interface DocumentIndex<T> {
+  /** Additional information about documents. */
   readonly docs: Map<T, DocumentDetails<T>>;
-  /**
-   * Inverted index root node.
-   */
+  /** Inverted index root node. */
   readonly root: InvertedIndexNode<T>;
+  /** Sum of field lengths in all documents. */
+  readonly fSum: Float64Array;
+  /** Average of field lengths in all documents. */
+  readonly fAvg: Float64Array;
+  /** Number of removed documents. */
+  removed: number;
   /**
-   * Additional information about indexed fields in all documents.
+   * Tokenizer is a function that breaks text into words, phrases, symbols, or
+   * other meaningful elements called tokens.
    */
-  readonly fields: FieldDetails[];
+  tokenizer(s: string): string[];
+  /**
+   * Filter is a function that processes tokens and returns terms, terms are
+   * used in Inverted Index to index documents.
+   */
+  filter(s: string): string,
 }
 
 /**
- * Creates an Index.
+ * Inverted Index Node.
+ *
+ * Inverted index is implemented with a
+ * [trie](https://en.wikipedia.org/wiki/Trie) data structure.
  *
  * @typeparam T Document key.
- * @param fieldsNum Number of fields.
- * @returns {@link Index}
  */
-export function createIndex<T>(fieldsNum: number): Index<T> {
-  const fields: FieldDetails[] = [];
-  for (let i = 0; i < fieldsNum; i++) {
-    fields.push({ sum: 0, avg: 0 });
-  }
-  return {
-    docs: new Map<T, DocumentDetails<T>>(),
-    root: createInvertedIndexNode(0),
-    fields,
-  };
+export interface InvertedIndexNode<T> {
+  /** Char code key. */
+  k: number;
+  /** Children nodes. */
+  c: InvertedIndexNode<T>[] | null;
+  /** Documents associated with this node. */
+  d: DocumentPointer<T>[] | null;
 }
 
 /**
@@ -47,13 +50,19 @@ export function createIndex<T>(fieldsNum: number): Index<T> {
  */
 export interface DocumentDetails<T> {
   /**
-   * Document key. It can be a simple unique ID or a direct reference to original document.
+   * Document key. It can be a simple unique ID or a direct reference to an
+   * original document.
    */
   readonly key: T;
-  /*
-   * Field lengths is an array that contains number of terms in each indexed text field.
+  /**
+   * Field count is an array that contains number of terms in each indexed
+   * text field.
    */
-  readonly fieldLengths: number[];
+  readonly fCount: Int32Array;
+  /**
+   * Removed flag.
+   */
+  removed: boolean;
 }
 
 /**
@@ -63,74 +72,81 @@ export interface DocumentDetails<T> {
  */
 export interface DocumentPointer<T> {
   /**
-   * Next {@link DocumentPointer} in the intrusive linked list.
-   */
-  next: DocumentPointer<T> | null;
-  /**
-   * Reference to a {@link DocumentDetails} object that is used for this document.
+   * Reference to a {@link DocumentDetails} object that is used for this
+   * document.
    */
   readonly details: DocumentDetails<T>;
   /**
    * Term frequency in each field.
    */
-  readonly termFrequency: number[];
+  readonly tf: Int32Array;
 }
 
+const _Int32Array = Int32Array;
+const _Float64Array = Float64Array;
+const _Map = Map;
+
+const SEARCH_CONTEXT = Object.seal({
+  found: false,
+  i: 0,
+});
+
+const findByCharCode = (array: InvertedIndexNode<any>[], charCode: number) => {
+  const ctx = SEARCH_CONTEXT;
+  let low = 0;
+  let high = array.length;
+
+  while (low < high) {
+    const mid = (low + high) >> 1;
+    const c = array[mid].k - charCode;
+    if (c < 0) {
+      low = mid + 1;
+    } else if (c > 0) {
+      high = mid;
+    } else {
+      ctx.found = true;
+      ctx.i = mid;
+      return;
+    }
+  }
+  ctx.found = false;
+  ctx.i = low;
+};
+
 /**
- * Inverted Index Node.
- *
- * Inverted index is implemented with a [trie](https://en.wikipedia.org/wiki/Trie) data structure.
+ * Creates an Index.
  *
  * @typeparam T Document key.
+ * @param fieldsNum Number of fields.
+ * @returns {@link Index}
  */
-export interface InvertedIndexNode<T> {
-  /**
-   * Char code is used to store keys in the trie data structure.
-   */
-  readonly charCode: number;
-  /**
-   * Next {@link InvertedIndexNode} in the intrusive linked list.
-   */
-  next: InvertedIndexNode<T> | null;
-  /**
-   * Linked list of children {@link InvertedIndexNode}.
-   */
-  firstChild: InvertedIndexNode<T> | null;
-  /**
-   * Linked list of documents associated with this node.
-   */
-  firstDoc: DocumentPointer<T> | null;
-}
+export const createIndex = <T>(
+  fieldsNum: number,
+  tokenizer: (s: string) => string[],
+  filter: (s: string) => string,
+): DocumentIndex<T> => ({
+  docs: new _Map(),
+  root: createInvertedIndexNode(0),
+  fSum: new _Float64Array(fieldsNum),
+  fAvg: new _Float64Array(fieldsNum),
+  removed: 0,
+  tokenizer,
+  filter,
+});
 
-/**
- * Field Details contains additional information about fields.
- */
-export interface FieldDetails {
-  /**
-   * Sum of field lengths in all documents.
-   */
-  sum: number;
-  /**
-   * Average of field lengths in all documents.
-   */
-  avg: number;
-}
 
 /**
  * Creates inverted index node.
  *
  * @typeparam T Document key.
- * @param charCode Char code.
+ * @param k Char code.
  * @returnd {@link InvertedIndexNode} instance.
  */
-export function createInvertedIndexNode<T>(charCode: number): InvertedIndexNode<T> {
-  return {
-    charCode,
-    next: null,
-    firstChild: null,
-    firstDoc: null,
-  };
-}
+const createInvertedIndexNode = <T>(k: number): InvertedIndexNode<T> => ({
+  k,
+  c: null,
+  d: null,
+});
 
 /**
  * Finds inverted index node that matches the `term`.
@@ -140,100 +156,51 @@ export function createInvertedIndexNode<T>(charCode: number): InvertedIndexNode<
  * @param term Term.
  * @returns Inverted index node that contains `term` or an `undefined` value.
  */
-export function findInvertedIndexNode<T>(
+export const findInvertedIndexNode = <T>(
   node: InvertedIndexNode<T> | undefined,
   term: string,
-): InvertedIndexNode<T> | undefined {
-  for (let i = 0; node !== void 0 && i < term.length; i++) {
-    node = findInvertedIndexChildNodeByCharCode(node, term.charCodeAt(i));
+): InvertedIndexNode<T> | undefined => {
+  const ctx = SEARCH_CONTEXT;
+  let i = 0;
+  while (node !== void 0 && i < term.length) {
+    const c = node.c;
+    if (c === null) {
+      return void 0;
+    }
+    findByCharCode(c, term.charCodeAt(i++));
+    if (ctx.found === false) {
+      return void 0;
+    }
+    node = c[ctx.i];
   }
   return node;
-}
-
-/**
- * Finds inverted index child node with matching `charCode`.
- *
- * @typeparam T Document key.
- * @param node {@link InvertedIndexNode}
- * @param charCode Char code.
- * @returns Matching {@link InvertedIndexNode} or `undefined`.
- */
-export function findInvertedIndexChildNodeByCharCode<T>(
-  node: InvertedIndexNode<T>,
-  charCode: number,
-): InvertedIndexNode<T> | undefined {
-  let child = node.firstChild;
-  while (child !== null) {
-    if (child.charCode === charCode) {
-      return child;
-    }
-    child = child.next;
-  }
-  return void 0;
-}
-
-/**
- * Adds inverted index child node.
- *
- * @typeparam T Document key.
- * @param parent Parent node.
- * @param child Child node to add.
- */
-export function addInvertedIndexChildNode<T>(parent: InvertedIndexNode<T>, child: InvertedIndexNode<T>): void {
-  if (parent.firstChild !== null) {
-    child.next = parent.firstChild;
-  }
-  parent.firstChild = child;
-}
-
-/**
- * Adds document to inverted index node.
- *
- * @typeparam T Document key.
- * @param node Inverted index node.
- * @param doc Posting.
- */
-export function addInvertedIndexDoc<T>(node: InvertedIndexNode<T>, doc: DocumentPointer<T>): void {
-  if (node.firstDoc !== null) {
-    doc.next = node.firstDoc;
-  }
-  node.firstDoc = doc;
-}
+};
 
 /**
  * Adds a document to the index.
  *
  * @typeparam T Document key.
  * @typeparam D Document type.
- * @param index {@link Index}.
- * @param fieldAccessors Field accessors.
- * @param tokenizer Tokenizer is a function that breaks a text into words, phrases, symbols, or other meaningful
- *  elements called tokens.
- * @param filter Filter is a function that processes tokens and returns terms, terms are used in Inverted Index to index
- *  documents.
+ * @param index {@link DocumentIndex}.
+ * @param fieldGetters Field getters.
  * @param key Document key.
  * @param doc Document.
  */
-export function addDocumentToIndex<T, D>(
-  index: Index<T>,
-  fieldAccessors: Array<(doc: D) => string>,
-  tokenizer: (s: string) => string[],
-  filter: (s: string) => string,
+export const indexAdd = <T, D>(
+  index: DocumentIndex<T>,
+  fieldGetters: Array<(doc: D) => string>,
   key: T,
   doc: D,
-): void {
-  const { docs, root, fields } = index;
-  const fieldLengths = [];
-  const termCounts = new Map<string, number[]>();
+): void => {
+  const { root, fSum, fAvg, docs, tokenizer, filter } = index;
+  const termCounts = new _Map<string, Int32Array>();
+  const fCount = new _Int32Array(fieldGetters.length);
 
-  for (let i = 0; i < fields.length; i++) {
-    const fieldValue = fieldAccessors[i](doc);
-    if (fieldValue === void 0) {
-      fieldLengths.push(0);
-    } else {
-      const fieldDetails = fields[i];
+  for (let i = 0; i < fieldGetters.length; i++) {
+    const field = fieldGetters[i](doc);
+    if (field !== void 0) {
       // tokenize text
-      const terms = tokenizer(fieldValue);
+      const terms = tokenizer(field);
 
       // filter and count terms, ignore empty strings
       let filteredTermsCount = 0;
@@ -241,144 +208,135 @@ export function addDocumentToIndex<T, D>(
         const term = filter(terms[j]);
         if (term !== "") {
           filteredTermsCount++;
-          let counts = termCounts.get(term);
-          if (counts === void 0) {
-            counts = new Array<number>(fields.length).fill(0);
-            termCounts.set(term, counts);
+          let fieldTermCounts = termCounts.get(term);
+          if (fieldTermCounts === void 0) {
+            fieldTermCounts = new _Int32Array(fSum.length);
+            termCounts.set(term, fieldTermCounts);
           }
-          counts[i] += 1;
+          fieldTermCounts[i] += 1;
         }
       }
-
-      fieldDetails.sum += filteredTermsCount;
-      fieldDetails.avg = fieldDetails.sum / (docs.size + 1);
-      fieldLengths[i] = filteredTermsCount;
+      fSum[i] += filteredTermsCount;
+      fAvg[i] = fSum[i] / (docs.size + 1);
+      fCount[i] = filteredTermsCount;
     }
   }
 
-  const details: DocumentDetails<T> = { key, fieldLengths };
+  const details = { key, fCount, removed: false } satisfies DocumentDetails<T>;
   docs.set(key, details);
   termCounts.forEach((termFrequency, term) => {
+    const ctx = SEARCH_CONTEXT;
     let node = root;
 
     for (let i = 0; i < term.length; i++) {
-      if (node.firstChild === null) {
-        node = createInvertedIndexNodes(node, term, i);
-        break;
+      const charCode = term.charCodeAt(i);
+      let newNode;
+      if (node.c === null) {
+        newNode = createInvertedIndexNode<T>(charCode);
+        node.c = [newNode];
+        node = newNode;
+        continue;
       }
-      const nextNode = findInvertedIndexChildNodeByCharCode(node, term.charCodeAt(i));
-      if (nextNode === void 0) {
-        node = createInvertedIndexNodes(node, term, i);
-        break;
+      findByCharCode(node.c, charCode);
+      if (ctx.found === false) {
+        newNode = createInvertedIndexNode<T>(charCode);
+        node.c.splice(ctx.i, 0, newNode);
+        node = newNode;
+      } else {
+        node = node.c[ctx.i];
       }
-      node = nextNode;
     }
 
-    addInvertedIndexDoc(node, { next: null, details, termFrequency });
+    const doc = { details, tf: termFrequency } satisfies DocumentPointer<T>;
+    if (node.d === null) {
+      node.d = [doc];
+    } else {
+      node.d.push(doc);
+    }
   });
-}
-
-/**
- * Creates inverted index nodes for the `term` starting from the `start` character.
- *
- * @typeparam T Document key.
- * @param parent Parent node.
- * @param term Term.
- * @param start First char code position in the `term`.
- * @returns Leaf {@link InvertedIndexNode}.
- */
-function createInvertedIndexNodes<T>(
-  parent: InvertedIndexNode<T>,
-  term: string,
-  start: number,
-): InvertedIndexNode<T> {
-  for (; start < term.length; start++) {
-    const newNode = createInvertedIndexNode<T>(term.charCodeAt(start));
-    addInvertedIndexChildNode(parent, newNode);
-    parent = newNode;
-  }
-  return parent;
-}
+};
 
 /**
  * Remove document from the index.
  *
  * @typeparam T Document key.
- * @param index {@link Index}.
- * @param removed Set of removed document ids.
+ * @param index {@link DocumentIndex}.
  * @param key Document key.
  */
-export function removeDocumentFromIndex<T>(index: Index<T>, removed: Set<T>, key: T): void {
-  const { docs: documents, fields } = index;
-  const docDetails = documents.get(key);
+export const indexRemove = <T>(
+  index: DocumentIndex<T>,
+  key: T,
+): void => {
+  const { docs, fSum, fAvg } = index;
+  const docDetails = docs.get(key);
+
   if (docDetails !== void 0) {
-    removed.add(key);
-    documents.delete(key);
-    for (let i = 0; i < fields.length; i++) {
-      const fieldLength = docDetails.fieldLengths[i];
+    index.removed++;
+    docDetails.removed = true;
+    docs.delete(key);
+    for (let i = 0; i < fSum.length; i++) {
+      const fieldLength = docDetails.fCount[i];
       if (fieldLength > 0) {
-        const field = fields[i];
-        field.sum -= fieldLength;
-        field.avg = field.sum / documents.size;
+        fSum[i] -= fieldLength;
+        fAvg[i] = fSum[i] / docs.size;
       }
     }
   }
-}
-
-/**
- * Cleans up removed documents from the {@link Index}.
- *
- * @typeparam T Document key.
- * @param index {@link Index}.
- * @param removed Set of removed document ids.
- */
-export function vacuumIndex<T>(index: Index<T>, removed: Set<T>): void {
-  _vacuumIndex(index.root, removed);
-  removed.clear();
-}
+};
 
 /**
  * Recursively cleans up removed documents from the index.
  *
  * @typeparam T Document key.
  * @param node {@link InvertedIndexNode}
- * @param removed Set of removed document ids.
  * @returns `1` when subtree contains any document.
  */
-function _vacuumIndex<T>(node: InvertedIndexNode<T>, removed: Set<T>): number {
-  let prevPointer: DocumentPointer<T> | null = null;
-  let pointer = node.firstDoc;
-  while (pointer !== null) {
-    const id = pointer.details.key;
-    if (removed.has(id)) {
-      if (prevPointer === null) {
-        node.firstDoc = pointer.next;
-      } else {
-        prevPointer.next = pointer.next;
+function _vacuumIndex<T>(node: InvertedIndexNode<T>): number {
+  let i = 0;
+  let ret = 0;
+  const d = node.d;
+  const c = node.c;
+
+  if (d !== null) {
+    while (i < d.length) {
+      const doc = d[i];
+      if (doc.details.removed === true) {
+        if (d.length > 1) {
+          d[i] = d[d.length - 1];
+        }
+        d.pop();
+        continue;
       }
-    } else {
-      prevPointer = pointer;
+      i++;
     }
-    pointer = pointer.next;
+    if (d.length > 0) {
+      ret = 1;
+    }
   }
 
-  let prevChild: InvertedIndexNode<T> | null = null;
-  let child = node.firstChild;
-  let ret = node.firstDoc === null ? 0 : 1;
-  while (child !== null) {
-    const r = _vacuumIndex(child, removed);
-    ret |= r;
-    if (r === 0) { // subtree doesn't have any documents, remove this node
-      if (prevChild === null) {
-        node.firstChild = child.next;
+  if (c !== null) {
+    i = 0;
+    while (i < c.length) {
+      const r = _vacuumIndex(c[i]);
+      ret |= r;
+      if (r === 0) {
+        c.splice(i, 1);
       } else {
-        prevChild.next = child.next;
+        i++;
       }
-    } else {
-      prevChild = child;
     }
-    child = child.next;
   }
 
   return ret;
+}
+
+/**
+ * Cleans up removed documents from the {@link DocumentIndex}.
+ *
+ * @typeparam T Document key.
+ * @param index {@link DocumentIndex}.
+ */
+export function indexVacuum<T>(index: DocumentIndex<T>): void {
+  _vacuumIndex(index.root);
+  index.removed = 0;
 }

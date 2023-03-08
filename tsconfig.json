@@ -1,6 +1,30 @@
 {
-  "extends": "ndx-dev-commons/tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "declarationDir": "dist",
+    "target": "es2022",
+    "module": "es2022",
+    "moduleResolution": "node16",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "importHelpers": true,
+    "noEmitHelpers": true,
+    "removeComments": false,
+    "resolveJsonModule": true,
+
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitOverride": true,
+    "noUnusedLocals": true,
+    "exactOptionalPropertyTypes": true,
+    "useUnknownInCatchVariables": false,
+    "skipLibCheck": true
+  },
   "include": [
-    "src/**/*.ts",
+    "src/**/*.ts"
   ]
 }

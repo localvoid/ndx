@@ -1,9 +1,0 @@
-{
-  "extends": "ndx-dev-commons/tsconfig.build.json",
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "**/__tests__"
-  ]
-}

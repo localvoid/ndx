@@ -1,14 +1,12 @@
 dist
-coverage
-.jest
-.tmp
-
 node_modules
+coverage
+
+*.tsbuildinfo
+npm-debug.log
 
 .DS_Store
 .idea
 .vscode
 
-npm-debug.log
-yarn-error.log
-lerna-debug.log
+pnpm-lock.yaml
