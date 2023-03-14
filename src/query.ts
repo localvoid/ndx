@@ -76,7 +76,6 @@ export const indexQuery = <T>(
               const pointer = d[k];
               if (pointer.details.removed === false) {
                 let score = 0;
-                console.log(pointer.details.fCount);
                 for (let x = 0; x < pointer.details.fCount.length; x++) {
                   let tf = pointer.tf[x];
                   if (tf > 0) {
