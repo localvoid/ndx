@@ -20,6 +20,7 @@ const sortByScore = (
 
 const max = Math.max;
 const log = Math.log;
+const fromCharCode = String.fromCharCode;
 
 /**
  * Performs a search with a simple free text query.
@@ -136,7 +137,7 @@ const _expandTerm = <I>(
   if (children !== null) {
     for (let i = 0; i < children.length; i++) {
       const c = children[i];
-      _expandTerm(c, results, term + String.fromCharCode(c.k));
+      _expandTerm(c, results, term + fromCharCode(c.k));
     }
   }
 };
