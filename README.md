@@ -2,6 +2,21 @@
 
 Lightweight Full-Text Indexing and Searching Library.
 
+This library were designed for a specific use case when all documents are
+stored on a disk (IndexedDB) and can be dynamically added or removed to an
+index.
+
+Query function supports only disjunction operators. Queries like `one two` will
+work as `"one" or "two"`.
+
+Inverted Index doesn't store term locations and query function won't be able
+to search for phrases like `"Super Mario"`.
+
+There are many [alternative solutions](https://github.com/leeoniya/uFuzzy#benchmark) with different tradeoffs that may better suit for your
+particular use cases. For a simple document search with a static dataset, I
+would recommend to use something like [fst](https://github.com/BurntSushi/fst)
+and deploy it as an edge function (wasm).
+
 ## Features
 
 - Multiple fields full-text indexing and searching.
@@ -12,7 +27,6 @@ matching documents.
 [Inverted Index](https://en.wikipedia.org/wiki/Inverted_index).
 - Configurable tokenizer and term filter.
 - Free text queries with query expansion.
-- Small memory footprint.
 
 ## Example
 
